@@ -32,7 +32,6 @@ export default [
     path: '/admin',
     name: 'admin',
     icon: 'crown',
-    access: 'canAdmin',
     routes: [
       {
         path: '/admin',
@@ -49,7 +48,6 @@ export default [
     path: '/blog',
     name: 'blog',
     icon: 'crown',
-    access: 'canAdmin',
     routes: [
       {
         path: '/blog',

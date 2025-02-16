@@ -118,12 +118,15 @@ const Login: React.FC = () => {
     try {
       // 登录
       const msg = await login({ ...values, type });
-      if (msg.status === 'ok') {
+      if (msg.code === 200&& msg.data && msg.data.token && msg.data.user) {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
         message.success(defaultLoginSuccessMessage);
+        // 设置请求头
+        localStorage.setItem("token",msg.data.token);
+        localStorage.setItem("user",JSON.stringify(msg.data.user));
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');

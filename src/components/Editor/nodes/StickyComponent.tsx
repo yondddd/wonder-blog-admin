@@ -20,7 +20,7 @@ import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
 import {$getNodeByKey} from 'lexical';
 import * as React from 'react';
 import {useEffect, useRef} from 'react';
-import useLayoutEffect from 'shared/useLayoutEffect';
+import useLayoutEffect from '@/components/Editor/shared/src/useLayoutEffect';
 
 import {createWebsocketProvider} from '../collaboration';
 import {useSharedHistoryContext} from '../context/SharedHistoryContext';

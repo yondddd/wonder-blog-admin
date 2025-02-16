@@ -23,7 +23,7 @@ import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import useLexicalEditable from '@lexical/react/useLexicalEditable';
 import { useEffect, useState } from 'react';
-import { CAN_USE_DOM } from 'src/components/Editor/shared/src/canUseDOM';
+import { CAN_USE_DOM } from '@/components/Editor/shared/src/canUseDOM';
 import { createWebsocketProvider } from './collaboration';
 import { useSettings } from './context/SettingsContext';
 import { useSharedHistoryContext } from './context/SharedHistoryContext';
@@ -71,7 +71,7 @@ import Placeholder from './ui/Placeholder';
 
 const skipCollaborationInit =
   // @ts-expect-error
-  window.parent != null && window.parent.frames.right === window;
+  window.parent !== null && window.parent.frames.right === window;
 
 export default function Editor(): JSX.Element {
   const { historyState } = useSharedHistoryContext();

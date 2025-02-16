@@ -4,9 +4,7 @@
 declare namespace API {
   type CurrentUser = {
     name?: string;
-    avatar?: string;
     userid?: string;
-    email?: string;
     signature?: string;
     title?: string;
     group?: string;
@@ -21,13 +19,31 @@ declare namespace API {
     };
     address?: string;
     phone?: string;
+    // 上面是没用的
+    avatar: string;
+    createTime: string; // ISO 日期字符串
+    email: string;
+    guid: string;
+    id: number;
+    nickname: string;
+    password: string | null;
+    role: string;
+    updateTime: string; // ISO 日期字符串
+    username: string;
   };
 
-  type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
-  };
+  type Response<T> ={
+    code?: number;
+    data?: T;
+    msg?: string;
+    success?: boolean;
+  }
+
+  type LoginData ={
+    token?: string;
+    user?: CurrentUser;
+  }
+
 
   type PageParams = {
     current?: number;
@@ -64,7 +80,6 @@ declare namespace API {
   type LoginParams = {
     username?: string;
     password?: string;
-    autoLogin?: boolean;
     type?: string;
   };
 

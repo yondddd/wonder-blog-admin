@@ -14,6 +14,8 @@ enum ErrorShowType {
 interface ResponseStructure {
   success: boolean;
   data: any;
+  msg: string;
+  code: number;
   errorCode?: number;
   errorMessage?: string;
   showType?: ErrorShowType;
@@ -29,12 +31,12 @@ export const errorConfig: RequestConfig = {
   errorConfig: {
     // 错误抛出
     errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
+      const { success, data, errorCode, msg, showType } =
         res as unknown as ResponseStructure;
       if (!success) {
-        const error: any = new Error(errorMessage);
+        const error: any = new Error(msg);
         error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data };
+        error.info = { errorCode, msg, showType, data };
         throw error; // 抛出自制的错误
       }
     },
@@ -87,10 +89,15 @@ export const errorConfig: RequestConfig = {
 
   // 请求拦截器
   requestInterceptors: [
-    (config: RequestOptions) => {
+    async (config: RequestOptions) => {
       // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token = 123');
-      return { ...config, url };
+      const url = config?.url;
+      const accessToken = localStorage.getItem('token');
+      return {
+        ...config,
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        url,
+      };
     },
   ],
 
