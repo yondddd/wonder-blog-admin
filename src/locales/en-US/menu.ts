@@ -45,8 +45,8 @@ export default {
   'menu.account.settings': 'Account Settings',
   'menu.account.trigger': 'Trigger Error',
   'menu.account.logout': 'Logout',
-  'menu.editor': 'Graphic Editor',
-  'menu.editor.flow': 'Flow Editor',
-  'menu.editor.mind': 'Mind Editor',
-  'menu.editor.koni': 'Koni Editor',
+  'menu.editor': 'Graphic Index',
+  'menu.editor.flow': 'Flow Index',
+  'menu.editor.mind': 'Mind Index',
+  'menu.editor.koni': 'Koni Index',
 };

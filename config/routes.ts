@@ -46,6 +46,28 @@ export default [
     ],
   },
   {
+    path: '/blog',
+    name: 'blog',
+    icon: 'crown',
+    access: 'canAdmin',
+    routes: [
+      {
+        path: '/blog',
+        redirect: '/blog/write',
+      },
+      {
+        path: '/blog/write',
+        name: 'write',
+        component: './Blog/Write',
+      },
+      {
+        path: '/blog/list',
+        name: 'list',
+        component: './Admin',
+      },
+    ],
+  },
+  {
     name: 'list.table-list',
     icon: 'table',
     path: '/list',
