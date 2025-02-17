@@ -26,7 +26,7 @@ import { useEffect, useState } from 'react';
 import { CAN_USE_DOM } from '@/components/Editor/shared/src/canUseDOM';
 import { createWebsocketProvider } from './collaboration';
 import { useSettings } from './context/SettingsContext';
-import { useSharedHistoryContext } from './context/SharedHistoryContext';
+import {SharedHistoryContext, useSharedHistoryContext} from './context/SharedHistoryContext';
 import ActionsPlugin from './plugins/ActionsPlugin';
 import AutocompletePlugin from './plugins/AutocompletePlugin';
 import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
@@ -72,6 +72,9 @@ import {LexicalComposer} from "@lexical/react/LexicalComposer";
 import PlaygroundNodes from "@/components/Editor/nodes/PlaygroundNodes";
 import  './index.css';
 import theme from "@/components/Editor/themes/PlaygroundEditorTheme";
+import {TableContext} from "@/components/Editor/plugins/TablePlugin";
+import {SharedAutocompleteContext} from "@/components/Editor/context/SharedAutocompleteContext";
+import Settings from "@/components/Editor/Settings";
 
 const skipCollaborationInit =
   // @ts-expect-error
@@ -237,19 +240,31 @@ export  function Editor(): JSX.Element {
 }
 
 const editorConfig = {
-  namespace: 'MyEditor',
-  onError: (error: Error) => console.error(error),
+  namespace: 'Playground',
   nodes: [...PlaygroundNodes],
-  heme: theme,
+  onError: (error: Error) => {
+    throw error;
+  },
+  theme: theme,
 };
+
 
 // 外层包裹组件
 export default function LexicalEditor() {
   return (
-    <div>
-      <LexicalComposer initialConfig={editorConfig}>
-        <Editor/>
-      </LexicalComposer>
-    </div>
+    <LexicalComposer initialConfig={editorConfig}>
+      <SharedHistoryContext>
+        <TableContext>
+          <SharedAutocompleteContext>
+            <div className="editor-shell">
+              <Editor />
+            </div>
+            <Settings />
+          </SharedAutocompleteContext>
+        </TableContext>
+      </SharedHistoryContext>
+    </LexicalComposer>
   );
 }
+
+
