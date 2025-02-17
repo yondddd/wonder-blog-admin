@@ -68,12 +68,16 @@ import TwitterPlugin from './plugins/TwitterPlugin';
 import YouTubePlugin from './plugins/YouTubePlugin';
 import ContentEditable from './ui/ContentEditable';
 import Placeholder from './ui/Placeholder';
+import {LexicalComposer} from "@lexical/react/LexicalComposer";
+import PlaygroundNodes from "@/components/Editor/nodes/PlaygroundNodes";
+import  './index.css';
+import theme from "@/components/Editor/themes/PlaygroundEditorTheme";
 
 const skipCollaborationInit =
   // @ts-expect-error
   window.parent !== null && window.parent.frames.right === window;
 
-export default function Editor(): JSX.Element {
+export  function Editor(): JSX.Element {
   const { historyState } = useSharedHistoryContext();
   const {
     settings: {
@@ -229,5 +233,23 @@ export default function Editor(): JSX.Element {
       </div>
       {showTreeView && <TreeViewPlugin />}
     </>
+  );
+}
+
+const editorConfig = {
+  namespace: 'MyEditor',
+  onError: (error: Error) => console.error(error),
+  nodes: [...PlaygroundNodes],
+  heme: theme,
+};
+
+// 外层包裹组件
+export default function LexicalEditor() {
+  return (
+    <div>
+      <LexicalComposer initialConfig={editorConfig}>
+        <Editor/>
+      </LexicalComposer>
+    </div>
   );
 }
