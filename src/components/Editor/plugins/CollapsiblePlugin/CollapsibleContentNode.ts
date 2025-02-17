@@ -12,13 +12,19 @@ import {
   DOMExportOutput,
   EditorConfig,
   ElementNode,
+  LexicalEditor,
   LexicalNode,
   SerializedElementNode,
 } from 'lexical';
+import {IS_CHROME} from '@/components/Editor/shared/src/environment';
+import invariant from '@/components/Editor/shared/src/invariant';
+
+import {$isCollapsibleContainerNode} from './CollapsibleContainerNode';
+import {domOnBeforeMatch, setDomHiddenUntilFound} from './CollapsibleUtils';
 
 type SerializedCollapsibleContentNode = SerializedElementNode;
 
-export function convertCollapsibleContentElement(
+export function $convertCollapsibleContentElement(
   domNode: HTMLElement,
 ): DOMConversionOutput | null {
   const node = $createCollapsibleContentNode();
@@ -36,13 +42,37 @@ export class CollapsibleContentNode extends ElementNode {
     return new CollapsibleContentNode(node.__key);
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
     const dom = document.createElement('div');
     dom.classList.add('Collapsible__content');
+    if (IS_CHROME) {
+      editor.getEditorState().read(() => {
+        const containerNode = this.getParentOrThrow();
+        invariant(
+          $isCollapsibleContainerNode(containerNode),
+          'Expected parent node to be a CollapsibleContainerNode',
+        );
+        if (!containerNode.__open) {
+          setDomHiddenUntilFound(dom);
+        }
+      });
+      domOnBeforeMatch(dom, () => {
+        editor.update(() => {
+          const containerNode = this.getParentOrThrow().getLatest();
+          invariant(
+            $isCollapsibleContainerNode(containerNode),
+            'Expected parent node to be a CollapsibleContainerNode',
+          );
+          if (!containerNode.__open) {
+            containerNode.toggleOpen();
+          }
+        });
+      });
+    }
     return dom;
   }
 
-  updateDOM(prevNode: CollapsibleContentNode, dom: HTMLElement): boolean {
+  updateDOM(prevNode: this, dom: HTMLElement): boolean {
     return false;
   }
 
@@ -53,7 +83,7 @@ export class CollapsibleContentNode extends ElementNode {
           return null;
         }
         return {
-          conversion: convertCollapsibleContentElement,
+          conversion: $convertCollapsibleContentElement,
           priority: 2,
         };
       },
@@ -62,6 +92,7 @@ export class CollapsibleContentNode extends ElementNode {
 
   exportDOM(): DOMExportOutput {
     const element = document.createElement('div');
+    element.classList.add('Collapsible__content');
     element.setAttribute('data-lexical-collapsible-content', 'true');
     return {element};
   }
@@ -69,19 +100,11 @@ export class CollapsibleContentNode extends ElementNode {
   static importJSON(
     serializedNode: SerializedCollapsibleContentNode,
   ): CollapsibleContentNode {
-    return $createCollapsibleContentNode();
+    return $createCollapsibleContentNode().updateFromJSON(serializedNode);
   }
 
   isShadowRoot(): boolean {
     return true;
-  }
-
-  exportJSON(): SerializedCollapsibleContentNode {
-    return {
-      ...super.exportJSON(),
-      type: 'collapsible-content',
-      version: 1,
-    };
   }
 }
 

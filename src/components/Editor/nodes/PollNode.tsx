@@ -6,6 +6,8 @@
  *
  */
 
+import type {JSX} from 'react';
+
 import {
   DecoratorNode,
   DOMConversionMap,
@@ -64,7 +66,7 @@ export type SerializedPollNode = Spread<
   SerializedLexicalNode
 >;
 
-function convertPollElement(domNode: HTMLElement): DOMConversionOutput | null {
+function $convertPollElement(domNode: HTMLElement): DOMConversionOutput | null {
   const question = domNode.getAttribute('data-lexical-poll-question');
   const options = domNode.getAttribute('data-lexical-poll-options');
   if (question !== null && options !== null) {
@@ -87,12 +89,10 @@ export class PollNode extends DecoratorNode<JSX.Element> {
   }
 
   static importJSON(serializedNode: SerializedPollNode): PollNode {
-    const node = $createPollNode(
+    return $createPollNode(
       serializedNode.question,
       serializedNode.options,
-    );
-    serializedNode.options.forEach(node.addOption);
-    return node;
+    ).updateFromJSON(serializedNode);
   }
 
   constructor(question: string, options: Options, key?: NodeKey) {
@@ -103,10 +103,9 @@ export class PollNode extends DecoratorNode<JSX.Element> {
 
   exportJSON(): SerializedPollNode {
     return {
+      ...super.exportJSON(),
       options: this.__options,
       question: this.__question,
-      type: 'poll',
-      version: 1,
     };
   }
 
@@ -158,7 +157,7 @@ export class PollNode extends DecoratorNode<JSX.Element> {
           return null;
         }
         return {
-          conversion: convertPollElement,
+          conversion: $convertPollElement,
           priority: 2,
         };
       },

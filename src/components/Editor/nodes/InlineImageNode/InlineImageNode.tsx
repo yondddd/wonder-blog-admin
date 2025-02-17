@@ -5,13 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
 
 import type {
   DOMConversionMap,
@@ -20,13 +13,20 @@ import type {
   EditorConfig,
   LexicalEditor,
   LexicalNode,
+  LexicalUpdateJSON,
   NodeKey,
   SerializedEditor,
   SerializedLexicalNode,
   Spread,
 } from 'lexical';
+import type {JSX} from 'react';
 
-import {$applyNodeReplacement, createEditor, DecoratorNode} from 'lexical';
+import {
+  $applyNodeReplacement,
+  createEditor,
+  DecoratorNode,
+  isHTMLElement,
+} from 'lexical';
 import * as React from 'react';
 import {Suspense} from 'react';
 
@@ -51,9 +51,9 @@ export interface UpdateInlineImagePayload {
   position?: Position;
 }
 
-function convertInlineImageElement(domNode: Node): null | DOMConversionOutput {
-  if (domNode instanceof HTMLImageElement) {
-    const {alt: altText, src, width, height} = domNode;
+function $convertInlineImageElement(domNode: Node): null | DOMConversionOutput {
+  if (isHTMLElement(domNode) && domNode.nodeName === 'IMG') {
+    const {alt: altText, src, width, height} = domNode as HTMLImageElement;
     const node = $createInlineImageNode({altText, height, src, width});
     return {node};
   }
@@ -102,16 +102,22 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
   static importJSON(
     serializedNode: SerializedInlineImageNode,
   ): InlineImageNode {
-    const {altText, height, width, caption, src, showCaption, position} =
-      serializedNode;
-    const node = $createInlineImageNode({
+    const {altText, height, width, src, showCaption, position} = serializedNode;
+    return $createInlineImageNode({
       altText,
       height,
       position,
       showCaption,
       src,
       width,
-    });
+    }).updateFromJSON(serializedNode);
+  }
+
+  updateFromJSON(
+    serializedNode: LexicalUpdateJSON<SerializedInlineImageNode>,
+  ): this {
+    const {caption} = serializedNode;
+    const node = super.updateFromJSON(serializedNode);
     const nestedEditor = node.__caption;
     const editorState = nestedEditor.parseEditorState(caption.editorState);
     if (!editorState.isEmpty()) {
@@ -123,7 +129,7 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
   static importDOM(): DOMConversionMap | null {
     return {
       img: (node: Node) => ({
-        conversion: convertInlineImageElement,
+        conversion: $convertInlineImageElement,
         priority: 0,
       }),
     };
@@ -160,14 +166,13 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
 
   exportJSON(): SerializedInlineImageNode {
     return {
+      ...super.exportJSON(),
       altText: this.getAltText(),
       caption: this.__caption.toJSON(),
       height: this.__height === 'inherit' ? 0 : this.__height,
       position: this.__position,
       showCaption: this.__showCaption,
       src: this.getSrc(),
-      type: 'inline-image',
-      version: 1,
       width: this.__width === 'inherit' ? 0 : this.__width,
     };
   }
@@ -237,11 +242,7 @@ export class InlineImageNode extends DecoratorNode<JSX.Element> {
     return span;
   }
 
-  updateDOM(
-    prevNode: InlineImageNode,
-    dom: HTMLElement,
-    config: EditorConfig,
-  ): false {
+  updateDOM(prevNode: this, dom: HTMLElement, config: EditorConfig): false {
     const position = this.__position;
     if (position !== prevNode.__position) {
       const className = `${config.theme.inlineImage} position-${position}`;

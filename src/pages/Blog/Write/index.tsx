@@ -5,9 +5,8 @@ import LexicalEditor from "@/components/Editor";
 
 const BlogWrite: React.FC = () => {
   return (
-    <PageContainer>
       <LexicalEditor/>
-    </PageContainer>
+    // </PageContainer>
   );
 };
 

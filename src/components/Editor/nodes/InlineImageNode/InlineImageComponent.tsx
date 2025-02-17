@@ -7,14 +7,16 @@
  */
 import type {Position} from './InlineImageNode';
 import type {BaseSelection, LexicalEditor, NodeKey} from 'lexical';
+import type {JSX} from 'react';
 
 import './InlineImageNode.css';
 
 import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {LexicalNestedComposer} from '@lexical/react/LexicalNestedComposer';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
 import {useLexicalNodeSelection} from '@lexical/react/useLexicalNodeSelection';
 import {mergeRegister} from '@lexical/utils';
 import {
@@ -34,16 +36,13 @@ import {
 import * as React from 'react';
 import {Suspense, useCallback, useEffect, useRef, useState} from 'react';
 
-import useModal from '../hooks/useModal';
-import FloatingLinkEditorPlugin from '../plugins/FloatingLinkEditorPlugin/index';
-import FloatingTextFormatToolbarPlugin from '../plugins/FloatingTextFormatToolbarPlugin/index';
-import LinkPlugin from '../plugins/LinkPlugin';
-import Button from '../ui/Button';
-import ContentEditable from '../ui/ContentEditable';
-import {DialogActions} from '../ui/Dialog';
-import Placeholder from '../ui/Placeholder';
-import Select from '../ui/Select';
-import TextInput from '../ui/TextInput';
+import useModal from '../../hooks/useModal';
+import LinkPlugin from '../../plugins/LinkPlugin';
+import Button from '../../ui/Button';
+import ContentEditable from '../../ui/ContentEditable';
+import {DialogActions} from '../../ui/Dialog';
+import Select from '../../ui/Select';
+import TextInput from '../../ui/TextInput';
 import {$isInlineImageNode, InlineImageNode} from './InlineImageNode';
 
 const imageCache = new Set();
@@ -203,23 +202,28 @@ export default function InlineImageComponent({
   const [editor] = useLexicalComposerContext();
   const [selection, setSelection] = useState<BaseSelection | null>(null);
   const activeEditorRef = useRef<LexicalEditor | null>(null);
+  const isEditable = useLexicalEditable();
 
-  const onDelete = useCallback(
+  const $onDelete = useCallback(
     (payload: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
+      const deleteSelection = $getSelection();
+      if (isSelected && $isNodeSelection(deleteSelection)) {
         const event: KeyboardEvent = payload;
         event.preventDefault();
-        const node = $getNodeByKey(nodeKey);
-        if ($isInlineImageNode(node)) {
-          node.remove();
+        if (isSelected && $isNodeSelection(deleteSelection)) {
+          deleteSelection.getNodes().forEach((node) => {
+            if ($isInlineImageNode(node)) {
+              node.remove();
+            }
+          });
         }
       }
       return false;
     },
-    [isSelected, nodeKey],
+    [isSelected],
   );
 
-  const onEnter = useCallback(
+  const $onEnter = useCallback(
     (event: KeyboardEvent) => {
       const latestSelection = $getSelection();
       const buttonElem = buttonRef.current;
@@ -248,7 +252,7 @@ export default function InlineImageComponent({
     [caption, isSelected, showCaption],
   );
 
-  const onEscape = useCallback(
+  const $onEscape = useCallback(
     (event: KeyboardEvent) => {
       if (
         activeEditorRef.current === caption ||
@@ -318,18 +322,18 @@ export default function InlineImageComponent({
       ),
       editor.registerCommand(
         KEY_DELETE_COMMAND,
-        onDelete,
+        $onDelete,
         COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_BACKSPACE_COMMAND,
-        onDelete,
+        $onDelete,
         COMMAND_PRIORITY_LOW,
       ),
-      editor.registerCommand(KEY_ENTER_COMMAND, onEnter, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_ENTER_COMMAND, $onEnter, COMMAND_PRIORITY_LOW),
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
-        onEscape,
+        $onEscape,
         COMMAND_PRIORITY_LOW,
       ),
     );
@@ -342,32 +346,34 @@ export default function InlineImageComponent({
     editor,
     isSelected,
     nodeKey,
-    onDelete,
-    onEnter,
-    onEscape,
+    $onDelete,
+    $onEnter,
+    $onEscape,
     setSelected,
   ]);
 
   const draggable = isSelected && $isNodeSelection(selection);
-  const isFocused = isSelected;
+  const isFocused = isSelected && isEditable;
   return (
     <Suspense fallback={null}>
       <>
-        <div draggable={draggable}>
-          <button
-            className="image-edit-button"
-            ref={buttonRef}
-            onClick={() => {
-              showModal('Update Inline Image', (onClose) => (
-                <UpdateInlineImageDialog
-                  activeEditor={editor}
-                  nodeKey={nodeKey}
-                  onClose={onClose}
-                />
-              ));
-            }}>
-            Edit
-          </button>
+        <span draggable={draggable}>
+          {isEditable && (
+            <button
+              className="image-edit-button"
+              ref={buttonRef}
+              onClick={() => {
+                showModal('Update Inline Image', (onClose) => (
+                  <UpdateInlineImageDialog
+                    activeEditor={editor}
+                    nodeKey={nodeKey}
+                    onClose={onClose}
+                  />
+                ));
+              }}>
+              Edit
+            </button>
+          )}
           <LazyImage
             className={
               isFocused
@@ -381,30 +387,24 @@ export default function InlineImageComponent({
             height={height}
             position={position}
           />
-        </div>
+        </span>
         {showCaption && (
-          <div className="image-caption-container">
+          <span className="image-caption-container">
             <LexicalNestedComposer initialEditor={caption}>
               <AutoFocusPlugin />
               <LinkPlugin />
-              <FloatingLinkEditorPlugin
-                isLinkEditMode={false}
-                setIsLinkEditMode={() => {}}
-              />
-              <FloatingTextFormatToolbarPlugin />
               <RichTextPlugin
                 contentEditable={
-                  <ContentEditable className="InlineImageNode__contentEditable" />
-                }
-                placeholder={
-                  <Placeholder className="InlineImageNode__placeholder">
-                    Enter a caption...
-                  </Placeholder>
+                  <ContentEditable
+                    placeholder="Enter a caption..."
+                    placeholderClassName="InlineImageNode__placeholder"
+                    className="InlineImageNode__contentEditable"
+                  />
                 }
                 ErrorBoundary={LexicalErrorBoundary}
               />
             </LexicalNestedComposer>
-          </div>
+          </span>
         )}
       </>
       {modal}

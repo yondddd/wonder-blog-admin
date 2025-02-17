@@ -25,7 +25,7 @@ import useLexicalEditable from '@lexical/react/useLexicalEditable';
 import { useEffect, useState } from 'react';
 import { CAN_USE_DOM } from '@/components/Editor/shared/src/canUseDOM';
 import { createWebsocketProvider } from './collaboration';
-import { useSettings } from './context/SettingsContext';
+import {SettingsContext, useSettings} from './context/SettingsContext';
 import {SharedHistoryContext, useSharedHistoryContext} from './context/SharedHistoryContext';
 import ActionsPlugin from './plugins/ActionsPlugin';
 import AutocompletePlugin from './plugins/AutocompletePlugin';
@@ -51,7 +51,6 @@ import InlineImagePlugin from './plugins/InlineImagePlugin';
 import KeywordsPlugin from './plugins/KeywordsPlugin';
 import { LayoutPlugin } from './plugins/LayoutPlugin/LayoutPlugin';
 import LinkPlugin from './plugins/LinkPlugin';
-import ListMaxIndentLevelPlugin from './plugins/ListMaxIndentLevelPlugin';
 import MarkdownShortcutPlugin from './plugins/MarkdownShortcutPlugin';
 import { MaxLengthPlugin } from './plugins/MaxLengthPlugin';
 import MentionsPlugin from './plugins/MentionsPlugin';
@@ -67,14 +66,18 @@ import TreeViewPlugin from './plugins/TreeViewPlugin';
 import TwitterPlugin from './plugins/TwitterPlugin';
 import YouTubePlugin from './plugins/YouTubePlugin';
 import ContentEditable from './ui/ContentEditable';
-import Placeholder from './ui/Placeholder';
 import {LexicalComposer} from "@lexical/react/LexicalComposer";
 import PlaygroundNodes from "@/components/Editor/nodes/PlaygroundNodes";
 import  './index.css';
 import theme from "@/components/Editor/themes/PlaygroundEditorTheme";
 import {TableContext} from "@/components/Editor/plugins/TablePlugin";
-import {SharedAutocompleteContext} from "@/components/Editor/context/SharedAutocompleteContext";
 import Settings from "@/components/Editor/Settings";
+import {ToolbarContext} from "@/components/Editor/context/ToolbarContext";
+import SpecialTextPlugin from "@/components/Editor/plugins/SpecialTextPlugin";
+import TableHoverActionsPlugin from "@/components/Editor/plugins/TableHoverActionsPlugin";
+import ShortcutsPlugin from "@/components/Editor/plugins/ShortcutsPlugin";
+import {useLexicalComposerContext} from "@lexical/react/LexicalComposerContext";
+import {FlashMessageContext} from "@/components/Editor/context/FlashMessageContext";
 
 const skipCollaborationInit =
   // @ts-expect-error
@@ -88,24 +91,31 @@ export  function Editor(): JSX.Element {
       isAutocomplete,
       isMaxLength,
       isCharLimit,
+      hasLinkAttributes,
       isCharLimitUtf8,
       isRichText,
       showTreeView,
       showTableOfContents,
       shouldUseLexicalContextMenu,
+      shouldPreserveNewLinesInMarkdown,
       tableCellMerge,
       tableCellBackgroundColor,
+      tableHorizontalScroll,
+      shouldAllowHighlightingWithBrackets,
     },
   } = useSettings();
   const isEditable = useLexicalEditable();
-  const text = isCollab
+  const placeholder = isCollab
     ? 'Enter some collaborative rich text...'
     : isRichText
-    ? 'Enter some rich text...'
-    : 'Enter some plain text...';
-  const placeholder = <Placeholder>{text}</Placeholder>;
-  const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
-  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
+      ? 'Enter some rich text...'
+      : 'Enter some plain text...';
+  const [floatingAnchorElem, setFloatingAnchorElem] =
+    useState<HTMLDivElement | null>(null);
+  const [isSmallWidthViewport, setIsSmallWidthViewport] =
+    useState<boolean>(false);
+  const [editor] = useLexicalComposerContext();
+  const [activeEditor, setActiveEditor] = useState(editor);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -133,7 +143,20 @@ export  function Editor(): JSX.Element {
 
   return (
     <>
-      {isRichText && <ToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />}
+      {isRichText && (
+        <ToolbarPlugin
+          editor={editor}
+          activeEditor={activeEditor}
+          setActiveEditor={setActiveEditor}
+          setIsLinkEditMode={setIsLinkEditMode}
+        />
+      )}
+      {isRichText && (
+        <ShortcutsPlugin
+          editor={activeEditor}
+          setIsLinkEditMode={setIsLinkEditMode}
+        />
+      )}
       <div
         className={`editor-container ${showTreeView ? 'tree-view' : ''} ${
           !isRichText ? 'plain-text' : ''
@@ -169,26 +192,25 @@ export  function Editor(): JSX.Element {
               contentEditable={
                 <div className="editor-scroller">
                   <div className="editor" ref={onRef}>
-                    <ContentEditable />
+                    <ContentEditable placeholder={placeholder} />
                   </div>
                 </div>
               }
-              placeholder={placeholder}
               ErrorBoundary={LexicalErrorBoundary}
             />
             <MarkdownShortcutPlugin />
             <CodeHighlightPlugin />
             <ListPlugin />
             <CheckListPlugin />
-            <ListMaxIndentLevelPlugin maxDepth={7} />
             <TablePlugin
               hasCellMerge={tableCellMerge}
               hasCellBackgroundColor={tableCellBackgroundColor}
+              hasHorizontalScroll={tableHorizontalScroll}
             />
             <TableCellResizer />
             <ImagesPlugin />
             <InlineImagePlugin />
-            <LinkPlugin />
+            <LinkPlugin hasLinkAttributes={hasLinkAttributes} />
             <PollPlugin />
             <TwitterPlugin />
             <YouTubePlugin />
@@ -212,15 +234,18 @@ export  function Editor(): JSX.Element {
                   setIsLinkEditMode={setIsLinkEditMode}
                 />
                 <TableCellActionMenuPlugin anchorElem={floatingAnchorElem} cellMerge={true} />
-                <FloatingTextFormatToolbarPlugin anchorElem={floatingAnchorElem} />
+                <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
+                <FloatingTextFormatToolbarPlugin
+                  anchorElem={floatingAnchorElem}
+                  setIsLinkEditMode={setIsLinkEditMode}
+                />
               </>
             )}
           </>
         ) : (
           <>
             <PlainTextPlugin
-              contentEditable={<ContentEditable />}
-              placeholder={placeholder}
+              contentEditable={<ContentEditable placeholder={placeholder} />}
               ErrorBoundary={LexicalErrorBoundary}
             />
             <HistoryPlugin externalHistoryState={historyState} />
@@ -232,7 +257,11 @@ export  function Editor(): JSX.Element {
         {isAutocomplete && <AutocompletePlugin />}
         <div>{showTableOfContents && <TableOfContentsPlugin />}</div>
         {shouldUseLexicalContextMenu && <ContextMenuPlugin />}
-        <ActionsPlugin isRichText={isRichText} />
+        {shouldAllowHighlightingWithBrackets && <SpecialTextPlugin />}
+        <ActionsPlugin
+          isRichText={isRichText}
+          shouldPreserveNewLinesInMarkdown={shouldPreserveNewLinesInMarkdown}
+        />
       </div>
       {showTreeView && <TreeViewPlugin />}
     </>
@@ -250,17 +279,17 @@ const editorConfig = {
 
 
 // 外层包裹组件
-export default function LexicalEditor() {
+function App() {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <SharedHistoryContext>
         <TableContext>
-          <SharedAutocompleteContext>
+          <ToolbarContext>
             <div className="editor-shell">
               <Editor />
             </div>
             <Settings />
-          </SharedAutocompleteContext>
+          </ToolbarContext>
         </TableContext>
       </SharedHistoryContext>
     </LexicalComposer>
@@ -268,3 +297,12 @@ export default function LexicalEditor() {
 }
 
 
+export default function LexicalEditor(): JSX.Element {
+  return (
+    <SettingsContext>
+      <FlashMessageContext>
+        <App />
+      </FlashMessageContext>
+    </SettingsContext>
+  );
+}

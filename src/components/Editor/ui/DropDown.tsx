@@ -6,6 +6,9 @@
  *
  */
 
+import type {JSX} from 'react';
+
+import {isDOMNode} from 'lexical';
 import * as React from 'react';
 import {
   ReactNode,
@@ -85,7 +88,9 @@ function DropDownItems({
   );
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!items) return;
+    if (!items) {
+      return;
+    }
 
     const key = event.key;
 
@@ -97,13 +102,17 @@ function DropDownItems({
       onClose();
     } else if (key === 'ArrowUp') {
       setHighlightedItem((prev) => {
-        if (!prev) return items[0];
+        if (!prev) {
+          return items[0];
+        }
         const index = items.indexOf(prev) - 1;
         return items[index === -1 ? items.length - 1 : index];
       });
     } else if (key === 'ArrowDown') {
       setHighlightedItem((prev) => {
-        if (!prev) return items[0];
+        if (!prev) {
+          return items[0];
+        }
         return items[items.indexOf(prev) + 1];
       });
     }
@@ -183,14 +192,15 @@ export default function DropDown({
     if (button !== null && showDropDown) {
       const handle = (event: MouseEvent) => {
         const target = event.target;
-        if (stopCloseOnClickSelf) {
-          if (
-            dropDownRef.current &&
-            dropDownRef.current.contains(target as Node)
-          )
-            return;
+        if (!isDOMNode(target)) {
+          return;
         }
-        if (!button.contains(target as Node)) {
+        if (stopCloseOnClickSelf) {
+          if (dropDownRef.current && dropDownRef.current.contains(target)) {
+            return;
+          }
+        }
+        if (!button.contains(target)) {
           setShowDropDown(false);
         }
       };

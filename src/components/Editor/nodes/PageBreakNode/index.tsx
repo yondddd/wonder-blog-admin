@@ -5,13 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+import type {JSX} from 'react';
+
 import './index.css';
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {useLexicalNodeSelection} from '@lexical/react/useLexicalNodeSelection';
 import {mergeRegister} from '@lexical/utils';
 import {
-  $getNodeByKey,
   $getSelection,
   $isNodeSelection,
   CLICK_COMMAND,
@@ -36,19 +38,20 @@ function PageBreakComponent({nodeKey}: {nodeKey: NodeKey}) {
   const [isSelected, setSelected, clearSelection] =
     useLexicalNodeSelection(nodeKey);
 
-  const onDelete = useCallback(
+  const $onDelete = useCallback(
     (event: KeyboardEvent) => {
       event.preventDefault();
-      if (isSelected && $isNodeSelection($getSelection())) {
-        const node = $getNodeByKey(nodeKey);
-        if ($isPageBreakNode(node)) {
-          node.remove();
-          return true;
-        }
+      const deleteSelection = $getSelection();
+      if (isSelected && $isNodeSelection(deleteSelection)) {
+        deleteSelection.getNodes().forEach((node) => {
+          if ($isPageBreakNode(node)) {
+            node.remove();
+          }
+        });
       }
       return false;
     },
-    [isSelected, nodeKey],
+    [isSelected],
   );
 
   useEffect(() => {
@@ -72,16 +75,16 @@ function PageBreakComponent({nodeKey}: {nodeKey: NodeKey}) {
       ),
       editor.registerCommand(
         KEY_DELETE_COMMAND,
-        onDelete,
+        $onDelete,
         COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_BACKSPACE_COMMAND,
-        onDelete,
+        $onDelete,
         COMMAND_PRIORITY_LOW,
       ),
     );
-  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected]);
+  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected]);
 
   useEffect(() => {
     const pbElem = editor.getElementByKey(nodeKey);
@@ -103,27 +106,22 @@ export class PageBreakNode extends DecoratorNode<JSX.Element> {
   }
 
   static importJSON(serializedNode: SerializedPageBreakNode): PageBreakNode {
-    return $createPageBreakNode();
+    return $createPageBreakNode().updateFromJSON(serializedNode);
   }
 
   static importDOM(): DOMConversionMap | null {
     return {
       figure: (domNode: HTMLElement) => {
         const tp = domNode.getAttribute('type');
-        if (tp !== this.getType()) return null;
+        if (tp !== this.getType()) {
+          return null;
+        }
 
         return {
-          conversion: convertPageBreakElement,
+          conversion: $convertPageBreakElement,
           priority: COMMAND_PRIORITY_HIGH,
         };
       },
-    };
-  }
-
-  exportJSON(): SerializedLexicalNode {
-    return {
-      type: this.getType(),
-      version: 1,
     };
   }
 
@@ -151,7 +149,7 @@ export class PageBreakNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-function convertPageBreakElement(): DOMConversionOutput {
+function $convertPageBreakElement(): DOMConversionOutput {
   return {node: $createPageBreakNode()};
 }
 

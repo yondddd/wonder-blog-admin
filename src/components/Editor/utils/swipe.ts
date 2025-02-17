@@ -25,20 +25,6 @@ function readTouch(e: TouchEvent): [number, number] | null {
   return [touch.clientX, touch.clientY];
 }
 
-function deleteListener(element: HTMLElement, cb: Listener): void {
-  const elementValues = elements.get(element);
-  if (elementValues === undefined) {
-    return;
-  }
-  const listeners = elementValues.listeners;
-  listeners.delete(cb);
-  if (listeners.size === 0) {
-    elements.delete(element);
-    element.removeEventListener('touchstart', elementValues.handleTouchstart);
-    element.removeEventListener('touchend', elementValues.handleTouchend);
-  }
-}
-
 function addListener(element: HTMLElement, cb: Listener): () => void {
   let elementValues = elements.get(element);
   if (elementValues === undefined) {
@@ -76,6 +62,20 @@ function addListener(element: HTMLElement, cb: Listener): () => void {
   }
   elementValues.listeners.add(cb);
   return () => deleteListener(element, cb);
+}
+
+function deleteListener(element: HTMLElement, cb: Listener): void {
+  const elementValues = elements.get(element);
+  if (elementValues === undefined) {
+    return;
+  }
+  const listeners = elementValues.listeners;
+  listeners.delete(cb);
+  if (listeners.size === 0) {
+    elements.delete(element);
+    element.removeEventListener('touchstart', elementValues.handleTouchstart);
+    element.removeEventListener('touchend', elementValues.handleTouchend);
+  }
 }
 
 export function addSwipeLeftListener(

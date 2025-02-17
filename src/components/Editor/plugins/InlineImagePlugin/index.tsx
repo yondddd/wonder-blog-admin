@@ -5,9 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import type {Position} from '../../nodes/InlineImageNode';
+import type {Position} from '../../nodes/InlineImageNode/InlineImageNode';
+import type {JSX} from 'react';
 
-import '../../ui/Checkbox.css';
+import '../../nodes/InlineImageNode/InlineImageNode.css';
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {$wrapNodeInElement, mergeRegister} from '@lexical/utils';
@@ -26,19 +27,20 @@ import {
   DRAGOVER_COMMAND,
   DRAGSTART_COMMAND,
   DROP_COMMAND,
+  getDOMSelectionFromTarget,
+  isHTMLElement,
   LexicalCommand,
   LexicalEditor,
 } from 'lexical';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {CAN_USE_DOM} from '@/components/Editor/shared/src/canUseDOM';
 
 import {
   $createInlineImageNode,
   $isInlineImageNode,
   InlineImageNode,
   InlineImagePayload,
-} from '../../nodes/InlineImageNode';
+} from '../../nodes/InlineImageNode/InlineImageNode';
 import Button from '../../ui/Button';
 import {DialogActions} from '../../ui/Dialog';
 import FileInput from '../../ui/FileInput';
@@ -46,9 +48,6 @@ import Select from '../../ui/Select';
 import TextInput from '../../ui/TextInput';
 
 export type InsertInlineImagePayload = Readonly<InlineImagePayload>;
-
-const getDOMSelection = (targetWindow: Window | null): Selection | null =>
-  CAN_USE_DOM ? (targetWindow || window).getSelection() : null;
 
 export const INSERT_INLINE_IMAGE_COMMAND: LexicalCommand<InlineImagePayload> =
   createCommand('INSERT_INLINE_IMAGE_COMMAND');
@@ -141,6 +140,7 @@ export function InsertInlineImageDialog({
       <div className="Input__wrapper">
         <input
           id="caption"
+          className="InlineImageNode_Checkbox"
           type="checkbox"
           checked={showCaption}
           onChange={handleShowCaptionChange}
@@ -185,21 +185,21 @@ export default function InlineImagePlugin(): JSX.Element | null {
       editor.registerCommand<DragEvent>(
         DRAGSTART_COMMAND,
         (event) => {
-          return onDragStart(event);
+          return $onDragStart(event);
         },
         COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand<DragEvent>(
         DRAGOVER_COMMAND,
         (event) => {
-          return onDragover(event);
+          return $onDragover(event);
         },
         COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand<DragEvent>(
         DROP_COMMAND,
         (event) => {
-          return onDrop(event, editor);
+          return $onDrop(event, editor);
         },
         COMMAND_PRIORITY_HIGH,
       ),
@@ -214,8 +214,8 @@ const TRANSPARENT_IMAGE =
 const img = document.createElement('img');
 img.src = TRANSPARENT_IMAGE;
 
-function onDragStart(event: DragEvent): boolean {
-  const node = getImageNodeInSelection();
+function $onDragStart(event: DragEvent): boolean {
+  const node = $getImageNodeInSelection();
   if (!node) {
     return false;
   }
@@ -244,8 +244,8 @@ function onDragStart(event: DragEvent): boolean {
   return true;
 }
 
-function onDragover(event: DragEvent): boolean {
-  const node = getImageNodeInSelection();
+function $onDragover(event: DragEvent): boolean {
+  const node = $getImageNodeInSelection();
   if (!node) {
     return false;
   }
@@ -255,8 +255,8 @@ function onDragover(event: DragEvent): boolean {
   return true;
 }
 
-function onDrop(event: DragEvent, editor: LexicalEditor): boolean {
-  const node = getImageNodeInSelection();
+function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
+  const node = $getImageNodeInSelection();
   if (!node) {
     return false;
   }
@@ -278,7 +278,7 @@ function onDrop(event: DragEvent, editor: LexicalEditor): boolean {
   return true;
 }
 
-function getImageNodeInSelection(): InlineImageNode | null {
+function $getImageNodeInSelection(): InlineImageNode | null {
   const selection = $getSelection();
   if (!$isNodeSelection(selection)) {
     return null;
@@ -311,24 +311,16 @@ declare global {
 function canDropImage(event: DragEvent): boolean {
   const target = event.target;
   return !!(
-    target &&
-    target instanceof HTMLElement &&
+    isHTMLElement(target) &&
     !target.closest('code, span.editor-image') &&
-    target.parentElement &&
+    isHTMLElement(target.parentElement) &&
     target.parentElement.closest('div.ContentEditable__root')
   );
 }
 
 function getDragSelection(event: DragEvent): Range | null | undefined {
   let range;
-  const target = event.target as null | Element | Document;
-  const targetWindow =
-    target == null
-      ? null
-      : target.nodeType === 9
-      ? (target as Document).defaultView
-      : (target as Element).ownerDocument.defaultView;
-  const domSelection = getDOMSelection(targetWindow);
+  const domSelection = getDOMSelectionFromTarget(event.target);
   if (document.caretRangeFromPoint) {
     range = document.caretRangeFromPoint(event.clientX, event.clientY);
   } else if (event.rangeParent && domSelection !== null) {

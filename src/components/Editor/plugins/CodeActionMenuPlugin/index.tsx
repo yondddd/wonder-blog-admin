@@ -6,6 +6,8 @@
  *
  */
 
+import type {JSX} from 'react';
+
 import './index.css';
 
 import {
@@ -15,7 +17,7 @@ import {
   normalizeCodeLang,
 } from '@lexical/code';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$getNearestNodeFromDOMNode} from 'lexical';
+import {$getNearestNodeFromDOMNode, isHTMLElement} from 'lexical';
 import {useEffect, useRef, useState} from 'react';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
@@ -109,26 +111,32 @@ function CodeActionMenuContainer({
     };
   }, [shouldListenMouseMove, debouncedOnMouseMove]);
 
-  editor.registerMutationListener(CodeNode, (mutations) => {
-    editor.getEditorState().read(() => {
-      for (const [key, type] of mutations) {
-        switch (type) {
-          case 'created':
-            codeSetRef.current.add(key);
-            setShouldListenMouseMove(codeSetRef.current.size > 0);
-            break;
+  useEffect(() => {
+    return editor.registerMutationListener(
+      CodeNode,
+      (mutations) => {
+        editor.getEditorState().read(() => {
+          for (const [key, type] of mutations) {
+            switch (type) {
+              case 'created':
+                codeSetRef.current.add(key);
+                break;
 
-          case 'destroyed':
-            codeSetRef.current.delete(key);
-            setShouldListenMouseMove(codeSetRef.current.size > 0);
-            break;
+              case 'destroyed':
+                codeSetRef.current.delete(key);
+                break;
 
-          default:
-            break;
-        }
-      }
-    });
-  });
+              default:
+                break;
+            }
+          }
+        });
+        setShouldListenMouseMove(codeSetRef.current.size > 0);
+      },
+      {skipInitialization: false},
+    );
+  }, [editor]);
+
   const normalizedLang = normalizeCodeLang(lang);
   const codeFriendlyName = getLanguageFriendlyName(lang);
 
@@ -157,7 +165,7 @@ function getMouseInfo(event: MouseEvent): {
 } {
   const target = event.target;
 
-  if (target && target instanceof HTMLElement) {
+  if (isHTMLElement(target)) {
     const codeDOMNode = target.closest<HTMLElement>(
       'code.PlaygroundEditorTheme__code',
     );

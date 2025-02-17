@@ -5,6 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
+
+import type {JSX} from 'react';
+
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {$insertNodeToNearestRoot, mergeRegister} from '@lexical/utils';
 import {
@@ -24,10 +27,11 @@ export default function PageBreakPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    if (!editor.hasNodes([PageBreakNode]))
+    if (!editor.hasNodes([PageBreakNode])) {
       throw new Error(
         'PageBreakPlugin: PageBreakNode is not registered on editor',
       );
+    }
 
     return mergeRegister(
       editor.registerCommand(
@@ -35,7 +39,9 @@ export default function PageBreakPlugin(): JSX.Element | null {
         () => {
           const selection = $getSelection();
 
-          if (!$isRangeSelection(selection)) return false;
+          if (!$isRangeSelection(selection)) {
+            return false;
+          }
 
           const focusNode = selection.focus.getNode();
           if (focusNode !== null) {

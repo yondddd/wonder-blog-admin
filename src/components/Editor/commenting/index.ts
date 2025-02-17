@@ -56,7 +56,10 @@ export function createComment(
     content,
     deleted: deleted === undefined ? false : deleted,
     id: id === undefined ? createUID() : id,
-    timeStamp: timeStamp === undefined ? performance.now() : timeStamp,
+    timeStamp:
+      timeStamp === undefined
+        ? performance.timeOrigin + performance.now()
+        : timeStamp,
     type: 'comment',
   };
 }
@@ -345,9 +348,9 @@ export class CommentStore {
                 target === sharedCommentsArray
                   ? undefined
                   : parent instanceof YMap &&
-                    (this._comments.find((t) => t.id === parent.get('id')) as
-                      | Thread
-                      | undefined);
+                  (this._comments.find((t) => t.id === parent.get('id')) as
+                    | Thread
+                    | undefined);
 
               if (Array.isArray(insert)) {
                 insert
@@ -361,34 +364,34 @@ export class CommentStore {
                     const commentOrThread =
                       type === 'thread'
                         ? createThread(
-                            map.get('quote'),
-                            map
-                              .get('comments')
-                              .toArray()
-                              .map(
-                                (
-                                  innerComment: Map<
-                                    string,
-                                    string | number | boolean
-                                  >,
-                                ) =>
-                                  createComment(
-                                    innerComment.get('content') as string,
-                                    innerComment.get('author') as string,
-                                    innerComment.get('id') as string,
-                                    innerComment.get('timeStamp') as number,
-                                    innerComment.get('deleted') as boolean,
-                                  ),
-                              ),
-                            id,
-                          )
+                          map.get('quote'),
+                          map
+                            .get('comments')
+                            .toArray()
+                            .map(
+                              (
+                                innerComment: Map<
+                                  string,
+                                  string | number | boolean
+                                >,
+                              ) =>
+                                createComment(
+                                  innerComment.get('content') as string,
+                                  innerComment.get('author') as string,
+                                  innerComment.get('id') as string,
+                                  innerComment.get('timeStamp') as number,
+                                  innerComment.get('deleted') as boolean,
+                                ),
+                            ),
+                          id,
+                        )
                         : createComment(
-                            map.get('content'),
-                            map.get('author'),
-                            id,
-                            map.get('timeStamp'),
-                            map.get('deleted'),
-                          );
+                          map.get('content'),
+                          map.get('author'),
+                          id,
+                          map.get('timeStamp'),
+                          map.get('deleted'),
+                        );
                     this._withLocalTransaction(() => {
                       this.addComment(
                         commentOrThread,

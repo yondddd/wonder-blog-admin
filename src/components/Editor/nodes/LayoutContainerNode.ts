@@ -8,8 +8,11 @@
 
 import type {
   DOMConversionMap,
+  DOMConversionOutput,
+  DOMExportOutput,
   EditorConfig,
   LexicalNode,
+  LexicalUpdateJSON,
   NodeKey,
   SerializedElementNode,
   Spread,
@@ -24,6 +27,20 @@ export type SerializedLayoutContainerNode = Spread<
   },
   SerializedElementNode
 >;
+
+function $convertLayoutContainerElement(
+  domNode: HTMLElement,
+): DOMConversionOutput | null {
+  const styleAttributes = window.getComputedStyle(domNode);
+  const templateColumns = styleAttributes.getPropertyValue(
+    'grid-template-columns',
+  );
+  if (templateColumns) {
+    const node = $createLayoutContainerNode(templateColumns);
+    return {node};
+  }
+  return null;
+}
 
 export class LayoutContainerNode extends ElementNode {
   __templateColumns: string;
@@ -50,7 +67,14 @@ export class LayoutContainerNode extends ElementNode {
     return dom;
   }
 
-  updateDOM(prevNode: LayoutContainerNode, dom: HTMLElement): boolean {
+  exportDOM(): DOMExportOutput {
+    const element = document.createElement('div');
+    element.style.gridTemplateColumns = this.__templateColumns;
+    element.setAttribute('data-lexical-layout-container', 'true');
+    return {element};
+  }
+
+  updateDOM(prevNode: this, dom: HTMLElement): boolean {
     if (prevNode.__templateColumns !== this.__templateColumns) {
       dom.style.gridTemplateColumns = this.__templateColumns;
     }
@@ -58,11 +82,33 @@ export class LayoutContainerNode extends ElementNode {
   }
 
   static importDOM(): DOMConversionMap | null {
-    return {};
+    return {
+      div: (domNode: HTMLElement) => {
+        if (!domNode.hasAttribute('data-lexical-layout-container')) {
+          return null;
+        }
+        return {
+          conversion: $convertLayoutContainerElement,
+          priority: 2,
+        };
+      },
+    };
   }
 
   static importJSON(json: SerializedLayoutContainerNode): LayoutContainerNode {
-    return $createLayoutContainerNode(json.templateColumns);
+    return $createLayoutContainerNode().updateFromJSON(json);
+  }
+
+  updateFromJSON(
+    serializedNode: LexicalUpdateJSON<SerializedLayoutContainerNode>,
+  ): this {
+    return super
+      .updateFromJSON(serializedNode)
+      .setTemplateColumns(serializedNode.templateColumns);
+  }
+
+  isShadowRoot(): boolean {
+    return true;
   }
 
   canBeEmpty(): boolean {
@@ -73,8 +119,6 @@ export class LayoutContainerNode extends ElementNode {
     return {
       ...super.exportJSON(),
       templateColumns: this.__templateColumns,
-      type: 'layout-container',
-      version: 1,
     };
   }
 
@@ -82,13 +126,15 @@ export class LayoutContainerNode extends ElementNode {
     return this.getLatest().__templateColumns;
   }
 
-  setTemplateColumns(templateColumns: string) {
-    this.getWritable().__templateColumns = templateColumns;
+  setTemplateColumns(templateColumns: string): this {
+    const self = this.getWritable();
+    self.__templateColumns = templateColumns;
+    return self;
   }
 }
 
 export function $createLayoutContainerNode(
-  templateColumns: string,
+  templateColumns: string = '',
 ): LayoutContainerNode {
   return new LayoutContainerNode(templateColumns);
 }

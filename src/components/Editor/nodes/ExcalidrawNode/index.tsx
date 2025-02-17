@@ -17,29 +17,39 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical';
+import type {JSX} from 'react';
 
 import {DecoratorNode} from 'lexical';
 import * as React from 'react';
 import {Suspense} from 'react';
+
+type Dimension = number | 'inherit';
 
 const ExcalidrawComponent = React.lazy(() => import('./ExcalidrawComponent'));
 
 export type SerializedExcalidrawNode = Spread<
   {
     data: string;
-    width: number | 'inherit';
-    height: number | 'inherit';
+    width?: Dimension;
+    height?: Dimension;
   },
   SerializedLexicalNode
 >;
 
-function convertExcalidrawElement(
+function $convertExcalidrawElement(
   domNode: HTMLElement,
 ): DOMConversionOutput | null {
   const excalidrawData = domNode.getAttribute('data-lexical-excalidraw-json');
+  const styleAttributes = window.getComputedStyle(domNode);
+  const heightStr = styleAttributes.getPropertyValue('height');
+  const widthStr = styleAttributes.getPropertyValue('width');
+  const height =
+    !heightStr || heightStr === 'inherit' ? 'inherit' : parseInt(heightStr, 10);
+  const width =
+    !widthStr || widthStr === 'inherit' ? 'inherit' : parseInt(widthStr, 10);
+
   if (excalidrawData) {
-    const node = $createExcalidrawNode();
-    node.__data = excalidrawData;
+    const node = $createExcalidrawNode(excalidrawData, width, height);
     return {
       node,
     };
@@ -49,36 +59,49 @@ function convertExcalidrawElement(
 
 export class ExcalidrawNode extends DecoratorNode<JSX.Element> {
   __data: string;
-  __width: number | 'inherit';
-  __height: number | 'inherit';
+  __width: Dimension;
+  __height: Dimension;
 
   static getType(): string {
     return 'excalidraw';
   }
 
   static clone(node: ExcalidrawNode): ExcalidrawNode {
-    return new ExcalidrawNode(node.__data, node.__key);
+    return new ExcalidrawNode(
+      node.__data,
+      node.__width,
+      node.__height,
+      node.__key,
+    );
   }
 
   static importJSON(serializedNode: SerializedExcalidrawNode): ExcalidrawNode {
-    return new ExcalidrawNode(serializedNode.data);
+    return new ExcalidrawNode(
+      serializedNode.data,
+      serializedNode.width ?? 'inherit',
+      serializedNode.height ?? 'inherit',
+    ).updateFromJSON(serializedNode);
   }
 
   exportJSON(): SerializedExcalidrawNode {
     return {
+      ...super.exportJSON(),
       data: this.__data,
-      height: this.__height,
-      type: 'excalidraw',
-      version: 1,
-      width: this.__width,
+      height: this.__height === 'inherit' ? undefined : this.__height,
+      width: this.__width === 'inherit' ? undefined : this.__width,
     };
   }
 
-  constructor(data = '[]', key?: NodeKey) {
+  constructor(
+    data = '[]',
+    width: Dimension = 'inherit',
+    height: Dimension = 'inherit',
+    key?: NodeKey,
+  ) {
     super(key);
     this.__data = data;
-    this.__width = 'inherit';
-    this.__height = 'inherit';
+    this.__width = width;
+    this.__height = height;
   }
 
   // View
@@ -86,12 +109,6 @@ export class ExcalidrawNode extends DecoratorNode<JSX.Element> {
     const span = document.createElement('span');
     const theme = config.theme;
     const className = theme.image;
-
-    span.style.width =
-      this.__width === 'inherit' ? 'inherit' : `${this.__width}px`;
-    span.style.height =
-      this.__height === 'inherit' ? 'inherit' : `${this.__height}px`;
-
     if (className !== undefined) {
       span.className = className;
     }
@@ -109,7 +126,7 @@ export class ExcalidrawNode extends DecoratorNode<JSX.Element> {
           return null;
         }
         return {
-          conversion: convertExcalidrawElement,
+          conversion: $convertExcalidrawElement,
           priority: 1,
         };
       },
@@ -143,12 +160,20 @@ export class ExcalidrawNode extends DecoratorNode<JSX.Element> {
     self.__data = data;
   }
 
-  setWidth(width: number | 'inherit'): void {
+  getWidth(): Dimension {
+    return this.getLatest().__width;
+  }
+
+  setWidth(width: Dimension): void {
     const self = this.getWritable();
     self.__width = width;
   }
 
-  setHeight(height: number | 'inherit'): void {
+  getHeight(): Dimension {
+    return this.getLatest().__height;
+  }
+
+  setHeight(height: Dimension): void {
     const self = this.getWritable();
     self.__height = height;
   }
@@ -156,18 +181,27 @@ export class ExcalidrawNode extends DecoratorNode<JSX.Element> {
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return (
       <Suspense fallback={null}>
-        <ExcalidrawComponent nodeKey={this.getKey()} data={this.__data} />
+        <ExcalidrawComponent
+          nodeKey={this.getKey()}
+          data={this.__data}
+          width={this.__width}
+          height={this.__height}
+        />
       </Suspense>
     );
   }
 }
 
-export function $createExcalidrawNode(): ExcalidrawNode {
-  return new ExcalidrawNode();
+export function $createExcalidrawNode(
+  data: string = '[]',
+  width: Dimension = 'inherit',
+  height: Dimension = 'inherit',
+): ExcalidrawNode {
+  return new ExcalidrawNode(data, width, height);
 }
 
 export function $isExcalidrawNode(
-  node: LexicalNode | null,
+  node: LexicalNode | null | undefined,
 ): node is ExcalidrawNode {
   return node instanceof ExcalidrawNode;
 }

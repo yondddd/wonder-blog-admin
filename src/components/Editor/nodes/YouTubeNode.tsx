@@ -17,6 +17,7 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical';
+import type {JSX} from 'react';
 
 import {BlockWithAlignableContents} from '@lexical/react/LexicalBlockWithAlignableContents';
 import {
@@ -66,7 +67,7 @@ export type SerializedYouTubeNode = Spread<
   SerializedDecoratorBlockNode
 >;
 
-function convertYoutubeElement(
+function $convertYoutubeElement(
   domNode: HTMLElement,
 ): null | DOMConversionOutput {
   const videoID = domNode.getAttribute('data-lexical-youtube');
@@ -89,16 +90,14 @@ export class YouTubeNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedYouTubeNode): YouTubeNode {
-    const node = $createYouTubeNode(serializedNode.videoID);
-    node.setFormat(serializedNode.format);
-    return node;
+    return $createYouTubeNode(serializedNode.videoID).updateFromJSON(
+      serializedNode,
+    );
   }
 
   exportJSON(): SerializedYouTubeNode {
     return {
       ...super.exportJSON(),
-      type: 'youtube',
-      version: 1,
       videoID: this.__id,
     };
   }
@@ -134,7 +133,7 @@ export class YouTubeNode extends DecoratorBlockNode {
           return null;
         }
         return {
-          conversion: convertYoutubeElement,
+          conversion: $convertYoutubeElement,
           priority: 1,
         };
       },

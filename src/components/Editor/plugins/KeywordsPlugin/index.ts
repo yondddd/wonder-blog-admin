@@ -7,6 +7,7 @@
  */
 
 import type {TextNode} from 'lexical';
+import type {JSX} from 'react';
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {useLexicalTextEntity} from '@lexical/react/useLexicalTextEntity';
@@ -26,7 +27,7 @@ export default function KeywordsPlugin(): JSX.Element | null {
     }
   }, [editor]);
 
-  const createKeywordNode = useCallback((textNode: TextNode): KeywordNode => {
+  const $createKeywordNode_ = useCallback((textNode: TextNode): KeywordNode => {
     return $createKeywordNode(textNode.getTextContent());
   }, []);
 
@@ -49,7 +50,7 @@ export default function KeywordsPlugin(): JSX.Element | null {
   useLexicalTextEntity<KeywordNode>(
     getKeywordMatch,
     KeywordNode,
-    createKeywordNode,
+    $createKeywordNode_,
   );
 
   return null;
