@@ -61,7 +61,7 @@ export default [
       {
         path: '/blog/list',
         name: 'list',
-        component: './Admin',
+        component: './Blog/List',
       },
     ],
   },

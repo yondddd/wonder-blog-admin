@@ -2,6 +2,18 @@
 /* eslint-disable */
 
 declare namespace API {
+  type PageReq = {
+    pageNo?: number;
+    pageSize?: number;
+  };
+
+  type Response<T> = {
+    code?: number;
+    data?: T;
+    msg?: string;
+    success?: boolean;
+  };
+
   type CurrentUser = {
     name?: string;
     userid?: string;
@@ -32,22 +44,45 @@ declare namespace API {
     username: string;
   };
 
-  type Response<T> ={
-    code?: number;
-    data?: T;
-    msg?: string;
-    success?: boolean;
-  }
-
-  type LoginData ={
+  type LoginData = {
     token?: string;
     user?: CurrentUser;
-  }
+  };
+
+  type BlogListItem = {
+    id: number;
+    category: {
+      id: number;
+      name: string;
+    };
+    userId: number;
+    title: string;
+    firstPicture?: string | null;
+    content: string;
+    description: string;
+    published: boolean;
+    recommend: boolean;
+    appreciation: boolean;
+    commentEnabled: boolean;
+    top: boolean;
+    createTime: string;
+    updateTime: string;
+    views: number;
+    words: number;
+    readTime: number;
+    password?: string;
+  };
 
 
   type PageParams = {
     current?: number;
     pageSize?: number;
+  };
+
+  type BlogPageParams = {
+    categoryId?: number;
+    tagId?: number;
+    title?: string;
   };
 
   type RuleListItem = {

@@ -1,6 +1,7 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
+import { history } from '@@/core/history';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
@@ -12,14 +13,16 @@ enum ErrorShowType {
 }
 // 与后端约定的响应数据格式
 interface ResponseStructure {
-  success: boolean;
+  code: number;
   data: any;
   msg: string;
-  code: number;
+  success: boolean;
   errorCode?: number;
   errorMessage?: string;
   showType?: ErrorShowType;
 }
+
+const loginPath = '/user/login';
 
 /**
  * @name 错误处理
@@ -31,9 +34,14 @@ export const errorConfig: RequestConfig = {
   errorConfig: {
     // 错误抛出
     errorThrower: (res) => {
-      const { success, data, errorCode, msg, showType } =
-        res as unknown as ResponseStructure;
+      const { success, data, code, errorCode, msg, showType } = res as unknown as ResponseStructure;
+      const { location } = history;
+      // 如果没有登录，重定向到 login
+      if (code === 401 && location.pathname !== loginPath) {
+        history.push(loginPath);
+      }
       if (!success) {
+        history.push(loginPath);
         const error: any = new Error(msg);
         error.name = 'BizError';
         error.info = { errorCode, msg, showType, data };
@@ -110,6 +118,7 @@ export const errorConfig: RequestConfig = {
       if (data?.success === false) {
         message.error('请求失败！');
       }
+
       return response;
     },
   ],
