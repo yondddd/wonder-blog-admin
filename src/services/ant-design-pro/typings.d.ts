@@ -7,9 +7,31 @@ declare namespace API {
     pageSize?: number;
   };
 
+  type IdReq = {
+    id?: number;
+  };
+
   type Response<T> = {
     code?: number;
     data?: T;
+    msg?: string;
+    success?: boolean;
+  };
+
+  type PageResponse<T> = {
+    code?: number;
+    data?: T;
+    msg?: string;
+    success?: boolean;
+    hasNext?: boolean;
+    pageNo?: number;
+    pageSize?: number;
+    total?: number;
+  };
+
+  type BooleanResponse = {
+    code?: number;
+    data?: boolean;
     msg?: string;
     success?: boolean;
   };
@@ -79,11 +101,64 @@ declare namespace API {
     pageSize?: number;
   };
 
-  type BlogPageParams = {
+  type BlogPageParams = PageReq & {
     categoryId?: number;
     tagId?: number;
     title?: string;
   };
+
+  type CategoryListItem = {
+    id: number;
+    name: string;
+  };
+
+  type TagListItem = {
+    id: number;
+    name: string;
+    color: string;
+  };
+
+  type BlogItem = {
+    id?: number;
+    category?: CategoryListItem;
+    userId?: number;
+    title?: string;
+    firstPicture?: string;
+    content?: string;
+    description?: string;
+    published?: boolean;
+    recommend?: boolean;
+    appreciation?: boolean;
+    commentEnabled?: boolean;
+    top?: boolean;
+    createTime?: Date;
+    updateTime?: Date;
+    views?: number;
+    words?: number;
+    readTime?: number;
+    password?: string;
+    tags?: TagListItem[];
+  };
+
+  type BlogSaveReq = {
+    id?: number;
+    title?: string;
+    firstPicture?: string;
+    content?: string;
+    description?: string;
+    published?: boolean;
+    recommend?: boolean;
+    appreciation?: boolean;
+    commentEnabled?: boolean;
+    top?: boolean;
+    views?: number;
+    words?: number;
+    readTime?: number;
+    password?: string;
+    category?: CategoryListItem;
+    tags?: TagListItem[];
+  };
+
 
   type RuleListItem = {
     key?: number;
@@ -100,9 +175,39 @@ declare namespace API {
     progress?: number;
   };
 
-  type RuleList = {
+  type RuleListResp = {
     data?: RuleListItem[];
     /** 列表的内容总数 */
+    total?: number;
+    success?: boolean;
+  };
+
+  type DelBlogReq = {
+    id?: number;
+  };
+
+  type RecommendBlogReq = {
+    id?: number;
+    recommend?: boolean;
+  };
+
+  type TopBlogReq = {
+    id?: number;
+    top?: boolean;
+  };
+
+  type VisibilityBlogReq = {
+    id?: number;
+    appreciation?: boolean;
+    recommend?: boolean;
+    commentEnabled?: boolean;
+    top?: boolean;
+    published?: boolean;
+    password?: string;
+  };
+
+  type BooleanResp = {
+    data?: boolean;
     total?: number;
     success?: boolean;
   };

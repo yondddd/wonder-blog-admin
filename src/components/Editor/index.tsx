@@ -25,8 +25,8 @@ import useLexicalEditable from '@lexical/react/useLexicalEditable';
 import { useEffect, useState } from 'react';
 import { CAN_USE_DOM } from '@/components/Editor/shared/src/canUseDOM';
 import { createWebsocketProvider } from './collaboration';
-import {SettingsContext, useSettings} from './context/SettingsContext';
-import {SharedHistoryContext, useSharedHistoryContext} from './context/SharedHistoryContext';
+import { SettingsContext, useSettings } from './context/SettingsContext';
+import { SharedHistoryContext, useSharedHistoryContext } from './context/SharedHistoryContext';
 import ActionsPlugin from './plugins/ActionsPlugin';
 import AutocompletePlugin from './plugins/AutocompletePlugin';
 import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
@@ -66,24 +66,24 @@ import TreeViewPlugin from './plugins/TreeViewPlugin';
 import TwitterPlugin from './plugins/TwitterPlugin';
 import YouTubePlugin from './plugins/YouTubePlugin';
 import ContentEditable from './ui/ContentEditable';
-import {LexicalComposer} from "@lexical/react/LexicalComposer";
-import PlaygroundNodes from "@/components/Editor/nodes/PlaygroundNodes";
-import  './index.css';
-import theme from "@/components/Editor/themes/PlaygroundEditorTheme";
-import {TableContext} from "@/components/Editor/plugins/TablePlugin";
-import Settings from "@/components/Editor/Settings";
-import {ToolbarContext} from "@/components/Editor/context/ToolbarContext";
-import SpecialTextPlugin from "@/components/Editor/plugins/SpecialTextPlugin";
-import TableHoverActionsPlugin from "@/components/Editor/plugins/TableHoverActionsPlugin";
-import ShortcutsPlugin from "@/components/Editor/plugins/ShortcutsPlugin";
-import {useLexicalComposerContext} from "@lexical/react/LexicalComposerContext";
-import {FlashMessageContext} from "@/components/Editor/context/FlashMessageContext";
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import PlaygroundNodes from '@/components/Editor/nodes/PlaygroundNodes';
+import './index.css';
+import theme from '@/components/Editor/themes/PlaygroundEditorTheme';
+import { TableContext } from '@/components/Editor/plugins/TablePlugin';
+import Settings from '@/components/Editor/Settings';
+import { ToolbarContext } from '@/components/Editor/context/ToolbarContext';
+import SpecialTextPlugin from '@/components/Editor/plugins/SpecialTextPlugin';
+import TableHoverActionsPlugin from '@/components/Editor/plugins/TableHoverActionsPlugin';
+import ShortcutsPlugin from '@/components/Editor/plugins/ShortcutsPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { FlashMessageContext } from '@/components/Editor/context/FlashMessageContext';
 
 const skipCollaborationInit =
   // @ts-expect-error
   window.parent !== null && window.parent.frames.right === window;
 
-export  function Editor(): JSX.Element {
+export function Editor({ debug }: EditorProps): JSX.Element {
   const { historyState } = useSharedHistoryContext();
   const {
     settings: {
@@ -110,10 +110,8 @@ export  function Editor(): JSX.Element {
     : isRichText
       ? 'Enter some rich text...'
       : 'Enter some plain text...';
-  const [floatingAnchorElem, setFloatingAnchorElem] =
-    useState<HTMLDivElement | null>(null);
-  const [isSmallWidthViewport, setIsSmallWidthViewport] =
-    useState<boolean>(false);
+  const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
+  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
   const [activeEditor, setActiveEditor] = useState(editor);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
@@ -152,13 +150,10 @@ export  function Editor(): JSX.Element {
         />
       )}
       {isRichText && (
-        <ShortcutsPlugin
-          editor={activeEditor}
-          setIsLinkEditMode={setIsLinkEditMode}
-        />
+        <ShortcutsPlugin editor={activeEditor} setIsLinkEditMode={setIsLinkEditMode} />
       )}
       <div
-        className={`editor-container ${showTreeView ? 'tree-view' : ''} ${
+        className={`editor-container ${debug ? 'tree-view' : ''} ${
           !isRichText ? 'plain-text' : ''
         }`}
       >
@@ -268,40 +263,69 @@ export  function Editor(): JSX.Element {
   );
 }
 
-const editorConfig = {
-  namespace: 'Playground',
-  nodes: [...PlaygroundNodes],
-  onError: (error: Error) => {
-    throw error;
-  },
-  theme: theme,
-};
+interface LexicalEditorProps {
+  initialContent?: string;
+  debug?: boolean;
+}
 
+interface AppProps {
+  initialContent?: string;
+  debug?: boolean;
+}
 
-// 外层包裹组件
-function App() {
+interface EditorProps {
+  debug?: boolean;
+}
+
+// 新的子组件用于包裹需要上下文的逻辑
+function EditorWrapper({ debug }: { debug?: boolean }) {
+  // 现在可以安全地使用上下文钩子
+  const [editor] = useLexicalComposerContext();
+
+  return (
+    <SharedHistoryContext>
+      <TableContext>
+        <ToolbarContext>
+          <div className="editor-shell">
+            <Editor debug={debug} />
+          </div>
+          <Settings />
+        </ToolbarContext>
+      </TableContext>
+    </SharedHistoryContext>
+  );
+}
+
+// 外层包装组件不再使用上下文钩子
+function App({ initialContent, debug }: AppProps) {
+  const editorConfig = {
+    namespace: 'Playground',
+    nodes: [...PlaygroundNodes],
+    onError: (error: Error) => {
+      throw error;
+    },
+    theme: theme,
+    editorState: initialContent
+      ? (editor: LexicalEditor) => editor.parseEditorState(initialContent)
+      : undefined,
+  };
+
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <SharedHistoryContext>
-        <TableContext>
-          <ToolbarContext>
-            <div className="editor-shell">
-              <Editor />
-            </div>
-            <Settings />
-          </ToolbarContext>
-        </TableContext>
-      </SharedHistoryContext>
+      {/* 将需要使用上下文的组件封装为子组件 */}
+      <EditorWrapper debug={debug} />
     </LexicalComposer>
   );
 }
 
-
-export default function LexicalEditor(): JSX.Element {
+export default function LexicalEditor({
+  initialContent,
+  debug = false,
+}: LexicalEditorProps): JSX.Element {
   return (
     <SettingsContext>
       <FlashMessageContext>
-        <App />
+        <App initialContent={initialContent} debug={debug} />
       </FlashMessageContext>
     </SettingsContext>
   );

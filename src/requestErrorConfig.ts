@@ -41,7 +41,6 @@ export const errorConfig: RequestConfig = {
         history.push(loginPath);
       }
       if (!success) {
-        history.push(loginPath);
         const error: any = new Error(msg);
         error.name = 'BizError';
         error.info = { errorCode, msg, showType, data };

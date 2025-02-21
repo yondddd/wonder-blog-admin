@@ -51,10 +51,10 @@ export default [
     routes: [
       {
         path: '/blog',
-        redirect: '/blog/write',
+        redirect: '/blog/list',
       },
       {
-        path: '/blog/write',
+        path: '/blog/edit/:id',
         name: 'write',
         component: './Blog/Write',
       },
