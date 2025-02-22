@@ -29,22 +29,6 @@ export default [
     component: './Welcome',
   },
   {
-    path: '/admin',
-    name: 'admin',
-    icon: 'crown',
-    routes: [
-      {
-        path: '/admin',
-        redirect: '/admin/sub-page',
-      },
-      {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        component: './Admin',
-      },
-    ],
-  },
-  {
     path: '/blog',
     name: 'blog',
     icon: 'crown',
@@ -57,6 +41,13 @@ export default [
         path: '/blog/edit/:id',
         name: 'write',
         component: './Blog/Write',
+        hideInMenu: true,
+      },
+      {
+        path: '/blog/preview/:id',
+        name: 'preview',
+        component: './Blog/Preview',
+        hideInMenu: true,
       },
       {
         path: '/blog/list',
@@ -64,12 +55,6 @@ export default [
         component: './Blog/List',
       },
     ],
-  },
-  {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
   },
   {
     path: '/',

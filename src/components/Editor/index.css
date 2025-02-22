@@ -15,9 +15,35 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #eee;
-  padding: 0 20px;
+  /*padding: 0 20px;*/
 }
 
+/*header {*/
+/*  max-width: 580px;*/
+/*  margin: auto;*/
+/*  position: relative;*/
+/*  display: flex;*/
+/*  justify-content: center;*/
+/*}*/
+
+/*header a {*/
+/*  max-width: 220px;*/
+/*  margin: 20px 0 0 0;*/
+/*  display: block;*/
+/*}*/
+
+/*header img {*/
+/*  display: block;*/
+/*  height: 100%;*/
+/*  width: 100%;*/
+/*}*/
+
+/*header h1 {*/
+/*  text-align: left;*/
+/*  color: #333;*/
+/*  display: inline-block;*/
+/*  margin: 20px 0 0 0;*/
+/*}*/
 
 .editor-shell {
   margin: 20px auto;
@@ -60,10 +86,10 @@ body {
 
 .editor {
   flex: auto;
-  max-width: 100%;
   position: relative;
   resize: vertical;
   z-index: -1;
+
 }
 
 .test-recorder-output {
@@ -1473,11 +1499,12 @@ button.action-button:disabled {
   border-top-right-radius: 10px;
   vertical-align: middle;
   overflow: auto;
-  height: 36px;
+  height: 42px;
   position: sticky;
   top: 0;
   z-index: 2;
   overflow-y: hidden; /* disable vertical scroll*/
+
 }
 
 button.toolbar-item {

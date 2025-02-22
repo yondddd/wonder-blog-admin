@@ -1,194 +1,255 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
-import {
-  Button,
-  Checkbox,
-  Form,
-  type FormInstance,
-  Input,
-  message,
-  Modal,
-  Radio,
-  Select,
-} from 'antd';
+import { Button, Checkbox, Col, Form, Input, message, Modal, Radio, Row, Select } from 'antd';
 import { history } from '@umijs/max';
 import LexicalEditor from '@/components/Editor';
 import { getBlogById, saveBlog, updateBlog } from '@/services/ant-design-pro/blogApi';
-
-import type { BlogItem, CategoryListItem, TagListItem } from '@/services/ant-design-pro/types';
-
 import { listAllCategory } from '@/services/ant-design-pro/categoryApi';
 import { listAllTag } from '@/services/ant-design-pro/tagApi';
-
-const { Option } = Select;
+import type { BlogItem, CategoryListItem, TagListItem } from '@/services/ant-design-pro/types';
 
 const BlogWrite: React.FC = () => {
-  const [form] = Form.useForm<FormInstance>();
-  const [categoryList, setCategoryList] = useState<CategoryListItem[]>([]);
+  const [form] = Form.useForm();
   const [tagList, setTagList] = useState<TagListItem[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [categoryList, setCategoryList] = useState<CategoryListItem[]>([]);
   const [visibilityModalVisible, setVisibilityModalVisible] = useState(false);
-  const [visibilityType, setVisibilityType] = useState<1 | 2 | 3>(1);
   const [initialValues, setInitialValues] = useState<Partial<BlogItem>>({});
-  const saveTimer = useRef<NodeJS.Timeout>();
-  const [contentVersion, setContentVersion] = useState(0);
+  const saveTimer = useRef<number>();
+  const contentRef = useRef<string>('');
+  const descriptionRef = useRef<string>('');
+  const isSubmittingRef = useRef(false);
 
-  // 初始化数据加载
+  const handleSubmit = async (values: any, autoSave = false) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    try {
+      const formValues = form.getFieldsValue(true);
+      const isUpdate = Boolean(formValues.id);
+      const payload = {
+        ...formValues,
+        id: formValues.id,
+        content: contentRef.current,
+        description: descriptionRef.current,
+        category: { name: formValues.category },
+        tags: (formValues.tags || []).map((t: string) => ({ name: t })),
+        published: formValues.visibilityType !== 2,
+        password: formValues.visibilityType === 3 ? formValues.password : '',
+        recommend: formValues.recommend ?? false,
+        appreciation: formValues.appreciation ?? false,
+        commentEnabled: formValues.commentEnabled ?? false,
+        top: formValues.top ?? false,
+      };
+      const result = await (isUpdate ? updateBlog : saveBlog)(payload);
+      if (result.success) {
+        if (!autoSave) message.success(isUpdate ? '更新成功' : '保存成功');
+        if (!isUpdate && result.data) {
+          history.push(`/blog/list`);
+        }
+      }
+    } catch (error) {
+      message.error('操作失败');
+    } finally {
+      isSubmittingRef.current = false;
+    }
+  };
+
+  const handleCategorySearch = useCallback(
+    (value: string) => {
+      const normalizedValue = value.trim().toLowerCase();
+      if (value && !categoryList.some((c) => c.name.toLowerCase() === normalizedValue)) {
+        setCategoryList((prev) => [...prev, { id: -1, name: value }]);
+      }
+    },
+    [categoryList],
+  );
+
+  const handleTagChange = useCallback(
+    (tags: string[]) => {
+      const newTags = tags.filter(
+        (t) => !tagList.some((lt) => lt.name.toLowerCase() === t.toLowerCase()),
+      );
+      if (newTags.length) {
+        setTagList((prev) => [...prev, ...newTags.map((t) => ({ id: -1, name: t }))]);
+      }
+    },
+    [tagList],
+  );
+
+  const handleModalSubmit = useCallback(async () => {
+    try {
+      const values = await form.validateFields();
+      await handleSubmit(values);
+      setVisibilityModalVisible(false);
+    } catch (error) {
+      console.error('验证失败:', error);
+      message.error('请检查表单字段');
+    }
+  }, [form]);
+
+  const handleDescriptionChange = useCallback(
+    (description: string) => {
+      descriptionRef.current = description;
+      form.setFieldsValue({ description });
+    },
+    [form],
+  );
+
+  const startAutoSave = useCallback(() => {
+    if (saveTimer.current) {
+      window.clearInterval(saveTimer.current);
+    }
+    saveTimer.current = window.setInterval(() => {
+      if (!isSubmittingRef.current) {
+        form
+          .validateFields()
+          .then((values) => handleSubmit(values, true))
+          .catch(() => {});
+      }
+    }, 30000);
+  }, [form]);
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categories, tags] = await Promise.all([listAllCategory(), listAllTag()]);
-        setCategoryList(categories.data || []);
-        setTagList(tags.data || []);
+        const [categoriesRes, tagsRes] = await Promise.all([listAllCategory(), listAllTag()]);
+        if (categoriesRes.success) setCategoryList(categoriesRes.data || []);
+        if (tagsRes.success) setTagList(tagsRes.data || []);
       } catch (error) {
-        message.error('初始化数据加载失败');
+        message.error('加载数据失败');
       }
     };
 
     const blogId = history.location.pathname.split('/').pop();
     if (blogId && blogId !== 'create') {
       getBlogById({ id: Number(blogId) }).then((res) => {
-        const data = res.data;
-        form.setFieldsValue(data);
-        setInitialValues(data);
-        setSelectedTags(data.tags?.map((t) => t.name) || []);
-        setVisibilityType(data.published ? (data.password ? 3 : 1) : 2);
+        if (res.success && res.data) {
+          const blog = res.data;
+          const values = {
+            ...blog,
+            category: blog.category?.name,
+            tags: blog.tags?.map((t) => t.name) || [],
+            visibilityType: blog.published ? (blog.password ? 3 : 1) : 2,
+            recommend: blog.recommend ?? false,
+            appreciation: blog.appreciation ?? false,
+            commentEnabled: blog.commentEnabled ?? false,
+            top: blog.top ?? false,
+            readTime: blog.readTime || 0,
+          };
+          form.setFieldsValue(values);
+          contentRef.current = blog.content || '';
+          descriptionRef.current = blog.description || '';
+          setInitialValues(blog);
+        }
       });
     }
-
     loadData();
     startAutoSave();
-    return () => clearInterval(saveTimer.current);
+    return () => {
+      if (saveTimer.current) {
+        window.clearInterval(saveTimer.current);
+      }
+    };
   }, []);
 
-  // 自动保存逻辑
-  const startAutoSave = () => {
-    saveTimer.current = setInterval(() => {
-      form.validateFields().then((values) => {
-        handleSubmit(values, true);
-      });
-    }, 30000);
-  };
-
-  const handleSubmit = async (values: any, autoSave = false) => {
-    const payload = {
-      ...values,
-      tags: selectedTags.map((t) => ({ name: t })),
-      published: visibilityType !== 2,
-      password: visibilityType === 3 ? values.password : '',
-    };
-
-    try {
-      const result = await (initialValues.id ? updateBlog(payload) : saveBlog(payload));
-      if (!autoSave) message.success(result.message);
-      if (!initialValues.id) history.push(`/blog/edit/${result.data}`);
-    } catch (error) {
-      message.error('保存失败');
-    }
-  };
-
-  // 分类选择处理
-  const handleCategorySearch = (value: string) => {
-    if (value && !categoryList.some((c) => c.name === value)) {
-      setCategoryList([...categoryList, { id: -1, name: value }]);
-    }
-  };
-
-  // 标签选择处理
-  const handleTagChange = (tags: string[]) => {
-    const newTags = tags.filter((t) => !tagList.some((lt) => lt.name === t));
-    if (newTags.length) {
-      setTagList([...tagList, ...newTags.map((t) => ({ id: -1, name: t }))]);
-    }
-    setSelectedTags(tags);
-  };
-
   return (
-    <PageContainer title={initialValues.id ? '编辑文章' : '新建文章'}>
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={initialValues}
-        onFinish={(values) => setVisibilityModalVisible(true)}
-      >
-        <Form.Item label="文章标题" name="title" rules={[{ required: true }]}>
-          <Input placeholder="请输入标题" />
-        </Form.Item>
-
-        <Form.Item label="文章首图" name="firstPicture" rules={[{ required: true }]}>
-          <Input placeholder="输入图片URL或上传图片" />
-        </Form.Item>
-
-        <div className="flex gap-4">
-          <Form.Item label="分类" name={['category', 'name']} rules={[{ required: true }]}>
-            <Select
-              showSearch
-              placeholder="选择或创建分类"
-              onSearch={handleCategorySearch}
-              filterOption={(input, option) =>
-                option?.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
-            >
-              {categoryList.map((category) => (
-                <Option key={category.id} value={category.name}>
-                  {category.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="标签" rules={[{ required: true }]}>
-            <Select
-              mode="multiple"
-              placeholder="选择或创建标签"
-              value={selectedTags}
-              onChange={handleTagChange}
-              filterOption={(input, option) =>
-                option?.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
-            >
-              {tagList.map((tag) => (
-                <Option key={tag.id} value={tag.name}>
-                  {tag.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+    <PageContainer
+      title={initialValues.id ? '编辑文章' : '新建文章'}
+      style={{
+        maxWidth: '100%', // 限制最大宽度
+        margin: '0 auto', // 居中
+      }}
+    >
+      <Form form={form} layout="vertical">
+        <div className="bg-white p-6">
+          <Row gutter={16} align="middle">
+            <Col span={8}>
+              <Form.Item label="文章标题" name="title" rules={[{ required: true }]}>
+                <Input placeholder="请输入标题" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="分类" name="category" rules={[{ required: true }]}>
+                <Select
+                  showSearch
+                  placeholder="选择或创建分类"
+                  options={categoryList.map((category) => ({
+                    value: category.name,
+                    label: category.name,
+                  }))}
+                  onSearch={handleCategorySearch}
+                  filterOption={(input, option) =>
+                    (option?.label as string).toLowerCase().includes(input.toLowerCase())
+                  }
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="标签" name="tags" rules={[{ required: true }]}>
+                <Select
+                  mode="multiple"
+                  placeholder="选择或创建标签"
+                  onChange={handleTagChange}
+                  options={tagList.map((tag) => ({
+                    value: tag.name,
+                    label: tag.name,
+                  }))}
+                  filterOption={(input, option) =>
+                    (option?.label as string).toLowerCase().includes(input.toLowerCase())
+                  }
+                  showSearch
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16} align="middle">
+            <Col span={6}>
+              <Form.Item label="文章首图" name="firstPicture" rules={[{ required: true }]}>
+                <Input placeholder="输入图片URL" />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="字数统计" name="words">
+                <Input type="number" />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="阅读时长" name="readTime">
+                <Input type="number" />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label="浏览次数" name="views">
+                <Input type="number" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <div className="border-t pt-4">
+            <div className="mb-2 text-sm">文章摘要</div>
+            <Form.Item name="description" hidden>
+              <Input />
+            </Form.Item>
+            <LexicalEditor
+              initialContent={descriptionRef.current}
+              onChange={handleDescriptionChange}
+            />
+          </div>
+          <div className="border-t pt-4">
+            <div className="mb-2 text-sm">文章正文</div>
+            <Form.Item name="content" hidden>
+              <Input />
+            </Form.Item>
+            <LexicalEditor
+              initialContent={contentRef.current}
+              onChange={(json) => {
+                contentRef.current = json;
+                form.setFieldsValue({ content: json });
+              }}
+            />
+          </div>
         </div>
-
-        <Form.Item label="文章摘要" name="description" rules={[{ required: true }]}>
-          <LexicalEditor
-            initialContent={initialValues.description}
-            onChange={(value) => form.setFieldValue('description', value)}
-          />
-        </Form.Item>
-
-        <Form.Item label="文章正文" name="content" rules={[{ required: true }]}>
-          <LexicalEditor
-            debug={true}
-            key={`content-${contentVersion}`}
-            initialContent={initialValues.content}
-            onChange={(value) => form.setFieldValue('content', value)}
-          />
-        </Form.Item>
-
-        <div className="flex gap-4">
-          <Form.Item label="字数统计" name="words" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item label="阅读时长（分钟）" name="readTime">
-            <Input type="number" disabled />
-          </Form.Item>
-        </div>
-
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            保存设置
-          </Button>
-        </Form.Item>
       </Form>
 
-      {/* 可见性设置模态框 */}
       <Modal
         title="可见性设置"
         open={visibilityModalVisible}
@@ -197,46 +258,75 @@ const BlogWrite: React.FC = () => {
           <Button key="cancel" onClick={() => setVisibilityModalVisible(false)}>
             取消
           </Button>,
-          <Button key="save" type="primary" onClick={() => form.submit()}>
+          <Button key="save" type="primary" onClick={handleModalSubmit}>
             保存
           </Button>,
           <Button
             key="preview"
             type="primary"
-            onClick={() => {
-              form.submit();
-              history.push(`/blog/preview/${initialValues.id}`);
+            onClick={async () => {
+              await handleModalSubmit();
+              if (initialValues.id) {
+                history.push(`/blog/preview/${initialValues.id}`);
+              }
             }}
           >
             保存并预览
           </Button>,
         ]}
       >
-        <Form layout="vertical">
-          <Form.Item label="可见性设置">
-            <Radio.Group value={visibilityType} onChange={(e) => setVisibilityType(e.target.value)}>
+        <Form form={form} layout="vertical">
+          <Form.Item label="可见性设置" name="visibilityType">
+            <Radio.Group>
               <Radio value={1}>公开</Radio>
               <Radio value={2}>私密</Radio>
               <Radio value={3}>密码保护</Radio>
             </Radio.Group>
           </Form.Item>
-
-          {visibilityType === 3 && (
-            <Form.Item label="访问密码" name="password" rules={[{ required: true }]}>
+          {form.getFieldValue('visibilityType') === 3 && (
+            <Form.Item
+              label="访问密码"
+              name="password"
+              rules={[{ required: true, message: '请输入访问密码' }]}
+            >
               <Input.Password />
             </Form.Item>
           )}
-
           <Form.Item label="功能开关">
-            <Checkbox.Group className="grid grid-cols-2 gap-4">
-              <Checkbox name="appreciation">开启赞赏</Checkbox>
-              <Checkbox name="recommend">开启推荐</Checkbox>
-              <Checkbox name="commentEnabled">开启评论</Checkbox>
-              <Checkbox name="top">开启置顶</Checkbox>
-            </Checkbox.Group>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item name="appreciation" valuePropName="checked" noStyle>
+                  <Checkbox>开启赞赏</Checkbox>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="recommend" valuePropName="checked" noStyle>
+                  <Checkbox>开启推荐</Checkbox>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="commentEnabled" valuePropName="checked" noStyle>
+                  <Checkbox>开启评论</Checkbox>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="top" valuePropName="checked" noStyle>
+                  <Checkbox>开启置顶</Checkbox>
+                </Form.Item>
+              </Col>
+            </Row>
           </Form.Item>
         </Form>
       </Modal>
+
+      <Button
+        type="primary"
+        shape="round"
+        style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000 }}
+        onClick={() => setVisibilityModalVisible(true)}
+      >
+        保存
+      </Button>
     </PageContainer>
   );
 };

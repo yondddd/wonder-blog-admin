@@ -1,4 +1,5 @@
 import {request} from '@umijs/max';
+import {BlogItem} from '@/services/ant-design-pro/types';
 
 /** 获取规则列表 GET /api/rule */
 export async function pageBlog(body: API.BlogPageParams, options?: { [key: string]: any }) {
@@ -63,7 +64,7 @@ export async function updateVisibility(
 }
 
 export async function getBlogById(body: API.IdReq, options?: { [key: string]: any }) {
-  return request<API.BlogItem>('/api/blog/detail', {
+  return request<API.Response<BlogItem>>('/api/blog/detail', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ export async function getBlogById(body: API.IdReq, options?: { [key: string]: an
 }
 
 export async function saveBlog(body: API.BlogSaveReq, options?: { [key: string]: any }) {
-  return request<API.BooleanResponse>('/api/blog/save', {
+  return request<API.Response<number>>('/api/blog/save', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export async function saveBlog(body: API.BlogSaveReq, options?: { [key: string]:
 }
 
 export async function updateBlog(body: API.BlogSaveReq, options?: { [key: string]: any }) {
-  return request<API.BooleanResponse>('/api/blog/update', {
+  return request<API.Response<boolean>>('/api/blog/update', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

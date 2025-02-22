@@ -118,28 +118,6 @@ declare namespace API {
     color: string;
   };
 
-  type BlogItem = {
-    id?: number;
-    category?: CategoryListItem;
-    userId?: number;
-    title?: string;
-    firstPicture?: string;
-    content?: string;
-    description?: string;
-    published?: boolean;
-    recommend?: boolean;
-    appreciation?: boolean;
-    commentEnabled?: boolean;
-    top?: boolean;
-    createTime?: Date;
-    updateTime?: Date;
-    views?: number;
-    words?: number;
-    readTime?: number;
-    password?: string;
-    tags?: TagListItem[];
-  };
-
   type BlogSaveReq = {
     id?: number;
     title?: string;

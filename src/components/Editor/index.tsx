@@ -83,7 +83,35 @@ const skipCollaborationInit =
   // @ts-expect-error
   window.parent !== null && window.parent.frames.right === window;
 
-export function Editor({ debug }: EditorProps): JSX.Element {
+export interface LexicalEditorProps {
+  initialContent?: string;
+  debug?: boolean;
+  onChange?: (value: string) => void;
+  showTableOfContent?: boolean;
+  readOnly?: boolean;
+}
+
+interface EditorProps {
+  debug?: boolean;
+  showTableOfContent?: boolean;
+  onChange?: (value: string) => void;
+}
+
+interface AppProps {
+  initialContent?: string;
+  debug?: boolean;
+  showTableOfContent?: boolean;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}
+
+function Editor({
+  debug = false,
+  showTableOfContent = false,
+  onChange,
+}: EditorProps & {
+  onChange?: (value: string) => void;
+}): JSX.Element {
   const { historyState } = useSharedHistoryContext();
   const {
     settings: {
@@ -94,8 +122,6 @@ export function Editor({ debug }: EditorProps): JSX.Element {
       hasLinkAttributes,
       isCharLimitUtf8,
       isRichText,
-      showTreeView,
-      showTableOfContents,
       shouldUseLexicalContextMenu,
       shouldPreserveNewLinesInMarkdown,
       tableCellMerge,
@@ -121,6 +147,14 @@ export function Editor({ debug }: EditorProps): JSX.Element {
       setFloatingAnchorElem(_floatingAnchorElem);
     }
   };
+
+  useEffect(() => {
+    if (!onChange) return;
+
+    return editor.registerUpdateListener(({ editorState }) => {
+      onChange(JSON.stringify(editorState.toJSON()));
+    });
+  }, [editor, onChange]);
 
   useEffect(() => {
     const updateViewPortWidth = () => {
@@ -250,7 +284,7 @@ export function Editor({ debug }: EditorProps): JSX.Element {
           <CharacterLimitPlugin charset={isCharLimit ? 'UTF-16' : 'UTF-8'} maxLength={5} />
         )}
         {isAutocomplete && <AutocompletePlugin />}
-        <div>{showTableOfContents && <TableOfContentsPlugin />}</div>
+        <div>{showTableOfContent && <TableOfContentsPlugin />}</div>
         {shouldUseLexicalContextMenu && <ContextMenuPlugin />}
         {shouldAllowHighlightingWithBrackets && <SpecialTextPlugin />}
         <ActionsPlugin
@@ -258,36 +292,45 @@ export function Editor({ debug }: EditorProps): JSX.Element {
           shouldPreserveNewLinesInMarkdown={shouldPreserveNewLinesInMarkdown}
         />
       </div>
-      {showTreeView && <TreeViewPlugin />}
+      {debug && <TreeViewPlugin />}
     </>
   );
 }
 
-interface LexicalEditorProps {
+// 修改后的EditorWrapper组件
+function EditorWrapper({
+  initialContent,
+  debug,
+  showTableOfContent,
+  onChange,
+}: {
   initialContent?: string;
   debug?: boolean;
-}
+  showTableOfContent?: boolean;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}) {
+  const [editor] = useLexicalComposerContext(); // 现在这里可以正确获取上下文
 
-interface AppProps {
-  initialContent?: string;
-  debug?: boolean;
-}
-
-interface EditorProps {
-  debug?: boolean;
-}
-
-// 新的子组件用于包裹需要上下文的逻辑
-function EditorWrapper({ debug }: { debug?: boolean }) {
-  // 现在可以安全地使用上下文钩子
-  const [editor] = useLexicalComposerContext();
+  // 添加手动更新editorState的effect
+  useEffect(() => {
+    if (initialContent) {
+      console.log('手动更新editorState');
+      try {
+        const newState = editor.parseEditorState(initialContent);
+        editor.setEditorState(newState);
+      } catch (error) {
+        console.error('手动更新editorState失败:', error);
+      }
+    }
+  }, [initialContent, editor]);
 
   return (
     <SharedHistoryContext>
       <TableContext>
         <ToolbarContext>
           <div className="editor-shell">
-            <Editor debug={debug} />
+            <Editor debug={debug} showTableOfContent={showTableOfContent} onChange={onChange} />
           </div>
           <Settings />
         </ToolbarContext>
@@ -296,8 +339,14 @@ function EditorWrapper({ debug }: { debug?: boolean }) {
   );
 }
 
-// 外层包装组件不再使用上下文钩子
-function App({ initialContent, debug }: AppProps) {
+// 修改后的App组件
+function App({
+  initialContent,
+  debug,
+  showTableOfContent,
+  onChange,
+  readOnly,
+}: AppProps & { onChange?: (value: string) => void }) {
   const editorConfig = {
     namespace: 'Playground',
     nodes: [...PlaygroundNodes],
@@ -305,15 +354,30 @@ function App({ initialContent, debug }: AppProps) {
       throw error;
     },
     theme: theme,
+    editable: !readOnly,
     editorState: initialContent
-      ? (editor: LexicalEditor) => editor.parseEditorState(initialContent)
+      ? (editor: any) => {
+          console.log('editorState初始化函数被调用');
+          try {
+            return editor.parseEditorState(initialContent);
+          } catch (error) {
+            console.error('初始化editorState失败:', error);
+            return editor.getEditorState();
+          }
+        }
       : undefined,
   };
 
   return (
-    <LexicalComposer initialConfig={editorConfig}>
-      {/* 将需要使用上下文的组件封装为子组件 */}
-      <EditorWrapper debug={debug} />
+    <LexicalComposer key={initialContent || 'default'} initialConfig={editorConfig}>
+      {/* 将手动更新逻辑移到EditorWrapper内部 */}
+      <EditorWrapper
+        initialContent={initialContent}
+        debug={debug}
+        showTableOfContent={showTableOfContent}
+        onChange={onChange}
+        readOnly={readOnly}
+      />
     </LexicalComposer>
   );
 }
@@ -321,11 +385,20 @@ function App({ initialContent, debug }: AppProps) {
 export default function LexicalEditor({
   initialContent,
   debug = false,
+  showTableOfContent = false,
+  onChange,
+  readOnly = false,
 }: LexicalEditorProps): JSX.Element {
   return (
     <SettingsContext>
       <FlashMessageContext>
-        <App initialContent={initialContent} debug={debug} />
+        <App
+          initialContent={initialContent}
+          debug={debug}
+          showTableOfContent={showTableOfContent}
+          onChange={onChange}
+          readOnly={readOnly}
+        />
       </FlashMessageContext>
     </SettingsContext>
   );

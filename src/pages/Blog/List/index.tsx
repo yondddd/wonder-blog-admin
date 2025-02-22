@@ -312,7 +312,7 @@ const BlogList: React.FC = () => {
             key="create"
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => history.push('/blog/edit')}
+            onClick={() => history.push('/blog/edit/create')}
           >
             新建文章
           </Button>,
