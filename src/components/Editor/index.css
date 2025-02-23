@@ -95,6 +95,35 @@ body {
   z-index: -1;
 }
 
+/* 修复有序/无序列表样式 */
+.editor ul,
+.editor ol {
+  margin: 0 0 0.2em 0; /* 减少底部间距 */
+  padding-left: 0.1em; /* 减少左侧缩进 */
+  line-height: 1.5; /* 保持行高统一 */
+}
+
+.editor ul {
+  list-style-type: disc !important; /* 实心圆点 */
+}
+
+.editor ol {
+  list-style-type: decimal !important; /* 数字编号 */
+}
+
+/* 可选：次级列表缩进调整 */
+.editor ul ul,
+.editor ol ol {
+  padding-left: 0.1em; /* 次级列表更小缩进 */
+}
+
+/* 针对深色模式的可见性调整 */
+.dark .editor ul::marker,
+.dark .editor ol::marker {
+  color: #94a3b8 !important; /* 浅灰色确保可见 */
+}
+
+
 .test-recorder-output {
   margin: 20px auto 20px auto;
   width: 100%;

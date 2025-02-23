@@ -17,6 +17,11 @@
   max-height: 850px;
   overflow: auto;
 }
+
+.ContentEditable__root::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 1025px) {
   .ContentEditable__root {
     padding-left: 8px;
