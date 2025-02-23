@@ -79,7 +79,8 @@
     "yjs": ">=13.5.42",
     "katex": "^0.16.10",
     "prettier": "^3.4.2",
-    "y-websocket": "^1.5.4"
+    "y-websocket": "^1.5.4",
+    "highlight.js": "^11.10.0"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^3.3.0",

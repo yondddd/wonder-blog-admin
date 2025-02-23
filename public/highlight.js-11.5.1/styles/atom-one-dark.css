@@ -1,0 +1,92 @@
+pre code.hljs {
+  display: block !important;
+  overflow-x: auto !important;
+  padding: 1em !important;
+}
+
+code.hljs {
+  padding: 3px 5px !important;
+}
+
+/* Atom One Dark by Daniel Gamage - Modified for better visibility */
+.hljs {
+  color: #abb2bf !important; /* Increased contrast */
+  background: #1e2127 !important; /* Slightly darker background */
+  font-family: "Consolas", "Monaco", "Courier New", monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  font-weight: 500 !important; /* Slightly bolder font */
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #a0a0a0 !important; /* Lighter comment color */
+  font-style: italic;
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-formula {
+  color: #e179ff !important; /* Brighter purple */
+}
+
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst {
+  color: #ff8b92 !important; /* Brighter red */
+}
+
+.hljs-literal {
+  color: #74e6ff !important; /* Brighter cyan */
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+  color: #b9f18d !important; /* Brighter green */
+}
+
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+  color: #ffd280 !important; /* Brighter orange */
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-title {
+  color: #7bc3ff !important; /* Brighter blue */
+}
+
+.hljs-built_in,
+.hljs-title.class_,
+.hljs-class .hljs-title {
+  color: #ffe68d !important; /* Brighter yellow */
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-link {
+  text-decoration: underline;
+}

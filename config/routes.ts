@@ -31,7 +31,7 @@ export default [
   {
     path: '/blog',
     name: 'blog',
-    icon: 'crown',
+    icon: 'ReadOutlined',
     routes: [
       {
         path: '/blog',

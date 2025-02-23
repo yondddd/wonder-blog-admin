@@ -1,6 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Checkbox, Col, Form, Input, message, Modal, Radio, Row, Select } from 'antd';
+import {
+  Button,
+  Card,
+  Checkbox,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Radio,
+  Row,
+  Select,
+  Typography,
+} from 'antd';
 import { history } from '@umijs/max';
 import LexicalEditor from '@/components/Editor';
 import { getBlogById, saveBlog, updateBlog } from '@/services/ant-design-pro/blogApi';
@@ -18,7 +31,9 @@ const BlogWrite: React.FC = () => {
   const contentRef = useRef<string>('');
   const descriptionRef = useRef<string>('');
   const isSubmittingRef = useRef(false);
+  const isChange = useRef(false);
 
+  const { Title } = Typography;
   const handleSubmit = async (values: any, autoSave = false) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
@@ -90,6 +105,16 @@ const BlogWrite: React.FC = () => {
     (description: string) => {
       descriptionRef.current = description;
       form.setFieldsValue({ description });
+      isChange.current = true;
+    },
+    [form],
+  );
+
+  const handleContentChange = useCallback(
+    (content: string) => {
+      contentRef.current = content;
+      form.setFieldsValue({ content });
+      isChange.current = true;
     },
     [form],
   );
@@ -99,12 +124,14 @@ const BlogWrite: React.FC = () => {
       window.clearInterval(saveTimer.current);
     }
     saveTimer.current = window.setInterval(() => {
-      if (!isSubmittingRef.current) {
+      console.log('定时');
+      if (!isSubmittingRef.current && isChange.current) {
         form
           .validateFields()
           .then((values) => handleSubmit(values, true))
           .catch(() => {});
       }
+      isChange.current = false;
     }, 30000);
   }, [form]);
 
@@ -152,80 +179,83 @@ const BlogWrite: React.FC = () => {
   }, []);
 
   return (
-    <PageContainer
-      title={initialValues.id ? '编辑文章' : '新建文章'}
-      style={{
-        maxWidth: '100%', // 限制最大宽度
-        margin: '0 auto', // 居中
-      }}
-    >
+    <PageContainer title={initialValues.id ? '编辑文章' : '新建文章'}>
       <Form form={form} layout="vertical">
-        <div className="bg-white p-6">
-          <Row gutter={16} align="middle">
-            <Col span={8}>
-              <Form.Item label="文章标题" name="title" rules={[{ required: true }]}>
-                <Input placeholder="请输入标题" />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="分类" name="category" rules={[{ required: true }]}>
-                <Select
-                  showSearch
-                  placeholder="选择或创建分类"
-                  options={categoryList.map((category) => ({
-                    value: category.name,
-                    label: category.name,
-                  }))}
-                  onSearch={handleCategorySearch}
-                  filterOption={(input, option) =>
-                    (option?.label as string).toLowerCase().includes(input.toLowerCase())
-                  }
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label="标签" name="tags" rules={[{ required: true }]}>
-                <Select
-                  mode="multiple"
-                  placeholder="选择或创建标签"
-                  onChange={handleTagChange}
-                  options={tagList.map((tag) => ({
-                    value: tag.name,
-                    label: tag.name,
-                  }))}
-                  filterOption={(input, option) =>
-                    (option?.label as string).toLowerCase().includes(input.toLowerCase())
-                  }
-                  showSearch
-                  allowClear
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16} align="middle">
-            <Col span={6}>
-              <Form.Item label="文章首图" name="firstPicture" rules={[{ required: true }]}>
-                <Input placeholder="输入图片URL" />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item label="字数统计" name="words">
-                <Input type="number" />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item label="阅读时长" name="readTime">
-                <Input type="number" />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item label="浏览次数" name="views">
-                <Input type="number" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <div className="border-t pt-4">
-            <div className="mb-2 text-sm">文章摘要</div>
+        <div className="max-w-4xl mx-auto" style={{ background: 'rgb(238, 239, 233)' }}>
+          {/* Metadata Section */}
+          <Card style={{ background: 'rgb(238, 239, 233)' }}>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item label="文章标题" name="title" rules={[{ required: true }]}>
+                  <Input placeholder="请输入标题" />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label="分类" name="category" rules={[{ required: true }]}>
+                  <Select
+                    showSearch
+                    placeholder="选择或创建分类"
+                    options={categoryList.map((category) => ({
+                      value: category.name,
+                      label: category.name,
+                    }))}
+                    onSearch={handleCategorySearch}
+                    filterOption={(input, option) =>
+                      (option?.label as string).toLowerCase().includes(input.toLowerCase())
+                    }
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label="标签" name="tags" rules={[{ required: true }]}>
+                  <Select
+                    mode="multiple"
+                    placeholder="选择或创建标签"
+                    onChange={handleTagChange}
+                    options={tagList.map((tag) => ({
+                      value: tag.name,
+                      label: tag.name,
+                    }))}
+                    filterOption={(input, option) =>
+                      (option?.label as string).toLowerCase().includes(input.toLowerCase())
+                    }
+                    showSearch
+                    allowClear
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label="文章首图" name="firstPicture" rules={[{ required: true }]}>
+                  <Input placeholder="输入图片URL" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Row gutter={8}>
+                  <Col span={8}>
+                    <Form.Item label="字数统计" name="words">
+                      <Input type="number" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={8}>
+                    <Form.Item label="阅读时长" name="readTime">
+                      <Input type="number" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={8}>
+                    <Form.Item label="浏览次数" name="views">
+                      <Input type="number" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </Card>
+
+          {/* Content Section */}
+          <div>
+            <Title level={5}>文章摘要</Title>
             <Form.Item name="description" hidden>
               <Input />
             </Form.Item>
@@ -234,22 +264,17 @@ const BlogWrite: React.FC = () => {
               onChange={handleDescriptionChange}
             />
           </div>
-          <div className="border-t pt-4">
-            <div className="mb-2 text-sm">文章正文</div>
+          <div className="mt-4">
+            <Title level={5}>文章正文</Title>
             <Form.Item name="content" hidden>
               <Input />
             </Form.Item>
-            <LexicalEditor
-              initialContent={contentRef.current}
-              onChange={(json) => {
-                contentRef.current = json;
-                form.setFieldsValue({ content: json });
-              }}
-            />
+            <LexicalEditor initialContent={contentRef.current} onChange={handleContentChange} />
           </div>
         </div>
       </Form>
 
+      {/* Modal for Visibility Settings */}
       <Modal
         title="可见性设置"
         open={visibilityModalVisible}
@@ -319,10 +344,17 @@ const BlogWrite: React.FC = () => {
         </Form>
       </Modal>
 
+      {/* Floating Save Button */}
       <Button
         type="primary"
         shape="round"
-        style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000 }}
+        style={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        }}
         onClick={() => setVisibilityModalVisible(true)}
       >
         保存

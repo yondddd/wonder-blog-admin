@@ -272,7 +272,7 @@ const BlogList: React.FC = () => {
   ];
 
   return (
-    <PageContainer title="文章管理" content="管理您的博客文章">
+    <PageContainer title="文章管理">
       <ProTable<BlogListItem, TableParams>
         actionRef={actionRef}
         rowKey="id"
