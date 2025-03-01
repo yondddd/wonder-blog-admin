@@ -78,40 +78,36 @@ import TableHoverActionsPlugin from '@/components/Editor/plugins/TableHoverActio
 import ShortcutsPlugin from '@/components/Editor/plugins/ShortcutsPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { FlashMessageContext } from '@/components/Editor/context/FlashMessageContext';
+import React from 'react';
 
 const skipCollaborationInit =
   // @ts-expect-error
   window.parent !== null && window.parent.frames.right === window;
 
-export interface LexicalEditorProps {
-  initialContent?: string;
+// 基础接口，包含共有属性
+interface BaseEditorProps {
   debug?: boolean;
-  onChange?: (value: string) => void;
   showTableOfContent?: boolean;
+  children?: React.ReactNode;
+}
+
+// 编辑器组件接口，只需要基础属性
+interface EditorProps extends BaseEditorProps {}
+
+// 应用组件接口，扩展基础属性
+interface AppProps extends BaseEditorProps {
+  initialContent?: string;
   readOnly?: boolean;
 }
 
-interface EditorProps {
-  debug?: boolean;
-  showTableOfContent?: boolean;
-  onChange?: (value: string) => void;
-}
-
-interface AppProps {
-  initialContent?: string;
-  debug?: boolean;
-  showTableOfContent?: boolean;
-  onChange?: (value: string) => void;
-  readOnly?: boolean;
-}
+// 导出的主组件接口，与 App 接口相同
+export interface LexicalEditorProps extends AppProps {}
 
 function Editor({
   debug = false,
   showTableOfContent = false,
-  onChange,
-}: EditorProps & {
-  onChange?: (value: string) => void;
-}): JSX.Element {
+  children,
+}: EditorProps): JSX.Element {
   const { historyState } = useSharedHistoryContext();
   const {
     settings: {
@@ -137,7 +133,6 @@ function Editor({
       ? 'Enter some rich text...'
       : 'Enter some plain text...';
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
-  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
   const [activeEditor, setActiveEditor] = useState(editor);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
@@ -148,30 +143,23 @@ function Editor({
     }
   };
 
-  useEffect(() => {
-    if (!onChange) return;
+  const floatingAnchorElementPlugins = React.useMemo(() => {
+    if (!floatingAnchorElem) return null;
 
-    return editor.registerUpdateListener(({ editorState }) => {
-      onChange(JSON.stringify(editorState.toJSON()));
-    });
-  }, [editor, onChange]);
-
-  useEffect(() => {
-    const updateViewPortWidth = () => {
-      const isNextSmallWidthViewport =
-        CAN_USE_DOM && window.matchMedia('(max-width: 1025px)').matches;
-
-      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
-        setIsSmallWidthViewport(isNextSmallWidthViewport);
-      }
-    };
-    updateViewPortWidth();
-    window.addEventListener('resize', updateViewPortWidth);
-
-    return () => {
-      window.removeEventListener('resize', updateViewPortWidth);
-    };
-  }, [isSmallWidthViewport]);
+    return (
+      <>
+        <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+        <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
+        <FloatingLinkEditorPlugin
+          anchorElem={floatingAnchorElem}
+          isLinkEditMode={isLinkEditMode}
+          setIsLinkEditMode={setIsLinkEditMode}
+        />
+        <TableCellActionMenuPlugin anchorElem={floatingAnchorElem} cellMerge={true} />
+        <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
+      </>
+    );
+  }, [floatingAnchorElem, isLinkEditMode]);
 
   return (
     <>
@@ -191,6 +179,8 @@ function Editor({
           !isRichText ? 'plain-text' : ''
         }`}
       >
+        {children}
+
         {isMaxLength && <MaxLengthPlugin maxLength={30} />}
         <DragDropPaste />
         <AutoFocusPlugin />
@@ -208,15 +198,7 @@ function Editor({
         <CommentPlugin providerFactory={isCollab ? createWebsocketProvider : undefined} />
         {isRichText ? (
           <>
-            {isCollab ? (
-              <CollaborationPlugin
-                id="main"
-                providerFactory={createWebsocketProvider}
-                shouldBootstrap={!skipCollaborationInit}
-              />
-            ) : (
-              <HistoryPlugin externalHistoryState={historyState} />
-            )}
+            <HistoryPlugin externalHistoryState={historyState} />
             <RichTextPlugin
               contentEditable={
                 <div className="editor-scroller">
@@ -253,23 +235,7 @@ function Editor({
             <CollapsiblePlugin />
             <PageBreakPlugin />
             <LayoutPlugin />
-            {floatingAnchorElem && !isSmallWidthViewport && (
-              <>
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-                <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
-                <FloatingLinkEditorPlugin
-                  anchorElem={floatingAnchorElem}
-                  isLinkEditMode={isLinkEditMode}
-                  setIsLinkEditMode={setIsLinkEditMode}
-                />
-                <TableCellActionMenuPlugin anchorElem={floatingAnchorElem} cellMerge={true} />
-                <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
-                <FloatingTextFormatToolbarPlugin
-                  anchorElem={floatingAnchorElem}
-                  setIsLinkEditMode={setIsLinkEditMode}
-                />
-              </>
-            )}
+            {floatingAnchorElementPlugins}
           </>
         ) : (
           <>
@@ -302,35 +268,86 @@ function EditorWrapper({
   initialContent,
   debug,
   showTableOfContent,
-  onChange,
-}: {
-  initialContent?: string;
-  debug?: boolean;
-  showTableOfContent?: boolean;
-  onChange?: (value: string) => void;
-  readOnly?: boolean;
-}) {
+  readOnly,
+  children,
+}: AppProps) {
   const [editor] = useLexicalComposerContext(); // 现在这里可以正确获取上下文
 
   // 添加手动更新editorState的effect
   useEffect(() => {
     if (initialContent) {
-      console.log('手动更新editorState');
       try {
-        const newState = editor.parseEditorState(initialContent);
+        // 尝试解析JSON格式的内容
+        let contentToLoad = initialContent;
+        try {
+          // 检查是否是JSON字符串
+          JSON.parse(initialContent);
+        } catch (e) {
+          // 如果不是JSON字符串，则尝试创建一个包含文本的简单editorState
+          contentToLoad = JSON.stringify({
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: "normal",
+                      style: "",
+                      text: initialContent,
+                      type: "text",
+                      version: 1
+                    }
+                  ],
+                  direction: "ltr",
+                  format: "",
+                  indent: 0,
+                  type: "paragraph",
+                  version: 1
+                }
+              ],
+              direction: "ltr",
+              format: "",
+              indent: 0,
+              type: "root",
+              version: 1
+            }
+          });
+        }
+
+        const newState = editor.parseEditorState(contentToLoad);
         editor.setEditorState(newState);
       } catch (error) {
         console.error('手动更新editorState失败:', error);
+
+        // 如果解析失败，尝试创建一个包含纯文本的editorState
+        try {
+          editor.update(() => {
+            const root = editor.getRootElement();
+            if (root) {
+              root.innerHTML = initialContent;
+            }
+          });
+        } catch (e) {
+          console.error('回退更新editorState也失败:', e);
+        }
       }
     }
   }, [initialContent, editor]);
+
+  // 使用 useMemo 优化渲染
+  const editorComponent = React.useMemo(() => (
+    <Editor debug={debug} showTableOfContent={showTableOfContent}>
+      {children}
+    </Editor>
+  ), [debug, showTableOfContent, children]);
 
   return (
     <SharedHistoryContext>
       <TableContext>
         <ToolbarContext>
           <div className="editor-shell">
-            <Editor debug={debug} showTableOfContent={showTableOfContent} onChange={onChange} />
+            {editorComponent}
           </div>
           <Settings />
         </ToolbarContext>
@@ -344,10 +361,11 @@ function App({
   initialContent,
   debug,
   showTableOfContent,
-  onChange,
   readOnly,
-}: AppProps & { onChange?: (value: string) => void }) {
-  const editorConfig = {
+  children,
+}: AppProps) {
+  // 使用 useMemo 缓存编辑器配置，避免不必要的重新计算
+  const editorConfig = React.useMemo(() => ({
     namespace: 'Playground',
     nodes: [...PlaygroundNodes],
     onError: (error: Error) => {
@@ -357,7 +375,6 @@ function App({
     editable: !readOnly,
     editorState: initialContent
       ? (editor: any) => {
-          console.log('editorState初始化函数被调用');
           try {
             return editor.parseEditorState(initialContent);
           } catch (error) {
@@ -366,28 +383,32 @@ function App({
           }
         }
       : undefined,
-  };
+  }), [initialContent, readOnly]);
 
+  // 使用 key 属性确保在 initialContent 变化时重新创建编辑器实例
+  // 但这可能会导致性能问题，如果频繁变化的话
+  // 考虑是否真的需要这个 key
   return (
-    <LexicalComposer key={initialContent || 'default'} initialConfig={editorConfig}>
-      {/* 将手动更新逻辑移到EditorWrapper内部 */}
+    <LexicalComposer initialConfig={editorConfig}>
       <EditorWrapper
         initialContent={initialContent}
         debug={debug}
         showTableOfContent={showTableOfContent}
-        onChange={onChange}
         readOnly={readOnly}
-      />
+      >
+        {children}
+      </EditorWrapper>
     </LexicalComposer>
   );
 }
 
-export default function LexicalEditor({
+// 使用 React.memo 包装 LexicalEditor 组件，避免不必要的重新渲染
+export default React.memo(function LexicalEditor({
   initialContent,
   debug = false,
   showTableOfContent = false,
-  onChange,
   readOnly = false,
+  children,
 }: LexicalEditorProps): JSX.Element {
   return (
     <SettingsContext>
@@ -396,10 +417,11 @@ export default function LexicalEditor({
           initialContent={initialContent}
           debug={debug}
           showTableOfContent={showTableOfContent}
-          onChange={onChange}
           readOnly={readOnly}
-        />
+        >
+          {children}
+        </App>
       </FlashMessageContext>
     </SettingsContext>
   );
-}
+});

@@ -17,8 +17,22 @@ import {
   Radio,
   Select,
   Switch,
+  Space,
+  Tag,
+  Divider,
+  Tooltip,
+  Typography,
+  Row,
+  Col,
 } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import {
+  PlusOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  LockOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
+} from '@ant-design/icons';
 import type {
   BlogListItem,
   CategoryListItem,
@@ -61,8 +75,10 @@ const BlogList: React.FC = () => {
     const fetchInitialData = async () => {
       try {
         const [categories, tags] = await Promise.all([listAllCategory(), listAllTag()]);
-        setCategoryList(categories.data || []);
-        setTagList(tags.data || []);
+
+        // Type assertion to tell TypeScript these are arrays
+        setCategoryList((categories.data || []) as CategoryListItem[]);
+        setTagList((tags.data || []) as TagListItem[]);
       } catch (error) {
         message.error('初始化数据加载失败');
         console.error('初始化数据加载失败:', error);
@@ -157,6 +173,7 @@ const BlogList: React.FC = () => {
       valueType: 'text',
       width: 200,
       ellipsis: true,
+      align: 'left',
     },
     {
       title: '分类',
@@ -172,6 +189,7 @@ const BlogList: React.FC = () => {
         </Select>
       ),
       width: 150,
+      align: 'center',
     },
     {
       title: '标签',
@@ -187,6 +205,7 @@ const BlogList: React.FC = () => {
       ),
       hideInTable: true,
       hideInSearch: true,
+      align: 'center',
     },
     {
       title: '置顶',
@@ -216,13 +235,33 @@ const BlogList: React.FC = () => {
     },
     {
       title: '可见性',
-      render: (_, record) => (
-        <a onClick={() => showVisibilityModal(record)}>
-          {record.published ? (record.password ? '密码保护' : '公开') : '私密'}
-        </a>
-      ),
+      render: (_, record) => {
+        // 使用更简洁的标签样式
+        const status = !record.published
+          ? { icon: <EyeInvisibleOutlined />, text: '私密', color: '#faad14' }
+          : record.password
+            ? { icon: <LockOutlined />, text: '密码', color: '#1677ff' }
+            : { icon: <EyeOutlined />, text: '公开', color: '#52c41a' };
+
+        return (
+          <span
+            onClick={() => showVisibilityModal(record)}
+            style={{
+              cursor: 'pointer',
+              color: status.color,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              justifyContent: 'center',
+              width: '100%'
+            }}
+          >
+            {status.icon} {status.text}
+          </span>
+        );
+      },
       hideInSearch: true,
-      width: 120,
+      width: 100,
       align: 'center',
     },
     {
@@ -231,6 +270,7 @@ const BlogList: React.FC = () => {
       valueType: 'dateTime',
       hideInSearch: true,
       width: 180,
+      align: 'center',
     },
     {
       title: '最近更新',
@@ -238,21 +278,21 @@ const BlogList: React.FC = () => {
       valueType: 'dateTime',
       hideInSearch: true,
       width: 180,
+      align: 'center',
     },
     {
       title: '操作',
       valueType: 'option',
       width: 220,
-      fixed: 'right',
+      align: 'center',
       render: (_, record) => [
         <Button
           key="preview"
-          type="link"
           onClick={() => history.push(`/blog/preview/${record.id}`)}
         >
           预览
         </Button>,
-        <Button key="edit" type="link" onClick={() => history.push(`/blog/edit/${record.id}`)}>
+        <Button key="edit" onClick={() => history.push(`/blog/edit/${record.id}`)}>
           编辑
         </Button>,
         <Popconfirm
@@ -263,7 +303,7 @@ const BlogList: React.FC = () => {
           okText="确认"
           cancelText="取消"
         >
-          <Button type="link" danger>
+          <Button danger>
             删除
           </Button>
         </Popconfirm>,
@@ -323,31 +363,77 @@ const BlogList: React.FC = () => {
           pageSizeOptions: ['10', '20', '50', '100'],
           defaultPageSize: 10,
         }}
+        tableStyle={{
+          backgroundColor: 'rgb(238, 239, 233)',
+        }}
+        cardProps={{
+          bodyStyle: {
+            backgroundColor: 'rgb(238, 239, 233)',
+            padding: '24px',
+          },
+        }}
+        options={{
+          setting: {
+            listsHeight: 400,
+          },
+        }}
       />
 
-      {/* 可见性设置模态框 */}
+      {/* 简化可见性设置模态框 */}
       <Modal
-        title="文章可见性设置"
         open={visible}
         onCancel={() => setVisible(false)}
-        onOk={() => visibilityForm.submit()}
+        footer={null}
         destroyOnClose
         centered
+        width={380}
+        maskClosable={false}
+        bodyStyle={{ padding: '20px' }}
       >
         <Form<BlogVisibilityFormValues>
           form={visibilityForm}
           layout="vertical"
           onFinish={handleVisibilitySubmit}
+          requiredMark={false}
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
         >
           <Form.Item
             name="radio"
-            label="可见性设置"
             rules={[{ required: true, message: '请选择可见性类型' }]}
+            style={{ marginBottom: 0 }}
           >
-            <Radio.Group>
-              <Radio value={1}>公开</Radio>
-              <Radio value={2}>私密</Radio>
-              <Radio value={3}>密码保护</Radio>
+            <Radio.Group style={{ width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+                {[
+                  { value: 1, icon: <EyeOutlined />, label: '公开', color: '#52c41a' },
+                  { value: 2, icon: <EyeInvisibleOutlined />, label: '私密', color: '#faad14' },
+                  { value: 3, icon: <LockOutlined />, label: '密码保护', color: '#1677ff' }
+                ].map(item => (
+                  <Radio
+                    value={item.value}
+                    key={item.value}
+                    style={{
+                      margin: 0,
+                      padding: 0,
+                      width: '100%',
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px 0',
+                      border: '1px solid #f0f0f0',
+                      borderRadius: '4px',
+                      height: '64px',
+                    }}>
+                      <span style={{ color: item.color, fontSize: '18px', marginBottom: '4px' }}>{item.icon}</span>
+                      <span style={{ fontSize: '12px' }}>{item.label}</span>
+                    </div>
+                  </Radio>
+                ))}
+              </div>
             </Radio.Group>
           </Form.Item>
 
@@ -356,13 +442,18 @@ const BlogList: React.FC = () => {
               getFieldValue('radio') === 3 && (
                 <Form.Item
                   name="password"
-                  label="访问密码"
                   rules={[
-                    { required: true, message: '密码保护模式必须设置密码' },
+                    { required: true, message: '请输入访问密码' },
                     { min: 4, message: '密码长度不能少于4位' },
                   ]}
+                  style={{ marginBottom: 0 }}
                 >
-                  <Input.Password placeholder="请输入访问密码" />
+                  <Input.Password
+                    prefix={<LockOutlined style={{ color: '#1677ff' }} />}
+                    placeholder="请输入访问密码"
+                    autoComplete="new-password"
+                    style={{ borderRadius: '4px', height: '32px' }}
+                  />
                 </Form.Item>
               )
             }
@@ -371,28 +462,54 @@ const BlogList: React.FC = () => {
           <Form.Item noStyle shouldUpdate={(prev, curr) => prev.radio !== curr.radio}>
             {({ getFieldValue }) =>
               getFieldValue('radio') !== 2 && (
-                <div className="flex flex-col gap-4">
-                  <Form.Item
-                    name="appreciation"
-                    label="功能开关"
-                    valuePropName="checked"
-                    className="mb-0"
-                  >
-                    <Switch checkedChildren="开启赞赏" unCheckedChildren="关闭赞赏" />
-                  </Form.Item>
-                  <Form.Item name="recommend" valuePropName="checked" className="mb-0">
-                    <Switch checkedChildren="开启推荐" unCheckedChildren="关闭推荐" />
-                  </Form.Item>
-                  <Form.Item name="commentEnabled" valuePropName="checked" className="mb-0">
-                    <Switch checkedChildren="开启评论" unCheckedChildren="关闭评论" />
-                  </Form.Item>
-                  <Form.Item name="top" valuePropName="checked" className="mb-0">
-                    <Switch checkedChildren="开启置顶" unCheckedChildren="关闭置顶" />
-                  </Form.Item>
+                <div style={{ marginBottom: 0 }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '8px',
+                  }}>
+                    {[
+                      { name: 'appreciation', label: '赞赏功能' },
+                      { name: 'recommend', label: '推荐文章' },
+                      { name: 'commentEnabled', label: '评论功能' },
+                      { name: 'top', label: '置顶文章' }
+                    ].map(item => (
+                      <div key={item.name} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: '#eeefe9',
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                      }}>
+                        <span style={{
+                          color: 'rgba(0, 0, 0, 0.65)',
+                          fontSize: '12px',
+                        }}>
+                          {item.label}
+                        </span>
+                        <Form.Item name={item.name} valuePropName="checked" style={{ margin: 0 }}>
+                          <Switch size="small" />
+                        </Form.Item>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )
             }
           </Form.Item>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '8px',
+            marginTop: '4px'
+          }}>
+            <Button size="small" onClick={() => setVisible(false)}>取消</Button>
+            <Button size="small" type="primary" htmlType="submit">
+              保存
+            </Button>
+          </div>
         </Form>
       </Modal>
     </PageContainer>

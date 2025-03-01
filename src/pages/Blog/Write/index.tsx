@@ -13,6 +13,7 @@ import {
   Row,
   Select,
   Typography,
+  Switch,
 } from 'antd';
 import { history } from '@umijs/max';
 import LexicalEditor from '@/components/Editor';
@@ -20,6 +21,27 @@ import { getBlogById, saveBlog, updateBlog } from '@/services/ant-design-pro/blo
 import { listAllCategory } from '@/services/ant-design-pro/categoryApi';
 import { listAllTag } from '@/services/ant-design-pro/tagApi';
 import type { BlogItem, CategoryListItem, TagListItem } from '@/services/ant-design-pro/types';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { EyeOutlined, EyeInvisibleOutlined, LockOutlined } from '@ant-design/icons';
+
+// 创建一个编辑器内容获取组件
+const EditorContentGetter = ({
+  editorRef
+}: {
+  editorRef: React.MutableRefObject<any>;
+}) => {
+  const [editor] = useLexicalComposerContext();
+
+  // 只将编辑器实例存储到ref中，不监听任何事件
+  React.useEffect(() => {
+    if (editor && editorRef) {
+      editorRef.current = editor;
+    }
+    // 不返回任何清理函数，因为没有设置任何需要清理的监听器
+  }, [editor, editorRef]);
+
+  return null;
+};
 
 const BlogWrite: React.FC = () => {
   const [form] = Form.useForm();
@@ -33,11 +55,34 @@ const BlogWrite: React.FC = () => {
   const isSubmittingRef = useRef(false);
   const isChange = useRef(false);
 
+  // 创建编辑器实例的ref
+  const descriptionEditorRef = useRef<any>(null);
+  const contentEditorRef = useRef<any>(null);
+
   const { Title } = Typography;
   const handleSubmit = async (values: any, autoSave = false) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
     try {
+      // 获取最新的编辑器内容
+      if (descriptionEditorRef.current) {
+        try {
+          const descriptionState = descriptionEditorRef.current.getEditorState();
+          descriptionRef.current = JSON.stringify(descriptionState.toJSON());
+        } catch (error) {
+          console.error('获取描述编辑器内容失败:', error);
+        }
+      }
+
+      if (contentEditorRef.current) {
+        try {
+          const contentState = contentEditorRef.current.getEditorState();
+          contentRef.current = JSON.stringify(contentState.toJSON());
+        } catch (error) {
+          console.error('获取内容编辑器内容失败:', error);
+        }
+      }
+
       const formValues = form.getFieldsValue(true);
       const isUpdate = Boolean(formValues.id);
       const payload = {
@@ -54,6 +99,12 @@ const BlogWrite: React.FC = () => {
         commentEnabled: formValues.commentEnabled ?? false,
         top: formValues.top ?? false,
       };
+
+      console.log('保存的内容:', {
+        description: descriptionRef.current,
+        content: contentRef.current
+      });
+
       const result = await (isUpdate ? updateBlog : saveBlog)(payload);
       if (result.success) {
         if (!autoSave) message.success(isUpdate ? '更新成功' : '保存成功');
@@ -63,6 +114,7 @@ const BlogWrite: React.FC = () => {
       }
     } catch (error) {
       message.error('操作失败');
+      console.error('保存失败:', error);
     } finally {
       isSubmittingRef.current = false;
     }
@@ -90,47 +142,21 @@ const BlogWrite: React.FC = () => {
     [tagList],
   );
 
-  const handleModalSubmit = useCallback(async () => {
-    try {
-      const values = await form.validateFields();
-      await handleSubmit(values);
-      setVisibilityModalVisible(false);
-    } catch (error) {
-      console.error('验证失败:', error);
-      message.error('请检查表单字段');
-    }
-  }, [form]);
-
-  const handleDescriptionChange = useCallback(
-    (description: string) => {
-      descriptionRef.current = description;
-      form.setFieldsValue({ description });
-      isChange.current = true;
-    },
-    [form],
-  );
-
-  const handleContentChange = useCallback(
-    (content: string) => {
-      contentRef.current = content;
-      form.setFieldsValue({ content });
-      isChange.current = true;
-    },
-    [form],
-  );
-
   const startAutoSave = useCallback(() => {
     if (saveTimer.current) {
       window.clearInterval(saveTimer.current);
     }
     saveTimer.current = window.setInterval(() => {
       console.log('定时');
-      if (!isSubmittingRef.current && isChange.current) {
+      if (!isSubmittingRef.current) {
+        // 不再依赖isChange标记，直接检查并保存内容
+        // 这样可以避免在用户未修改内容时进行不必要的保存
         form
           .validateFields()
           .then((values) => handleSubmit(values, true))
           .catch(() => {});
       }
+      // 重置编辑标记
       isChange.current = false;
     }, 30000);
   }, [form]);
@@ -139,8 +165,8 @@ const BlogWrite: React.FC = () => {
     const loadData = async () => {
       try {
         const [categoriesRes, tagsRes] = await Promise.all([listAllCategory(), listAllTag()]);
-        if (categoriesRes.success) setCategoryList(categoriesRes.data || []);
-        if (tagsRes.success) setTagList(tagsRes.data || []);
+        if (categoriesRes.success) setCategoryList((categoriesRes.data || []) as CategoryListItem[]);
+        if (tagsRes.success) setTagList((tagsRes.data || []) as TagListItem[]);
       } catch (error) {
         message.error('加载数据失败');
       }
@@ -259,88 +285,199 @@ const BlogWrite: React.FC = () => {
             <Form.Item name="description" hidden>
               <Input />
             </Form.Item>
-            <LexicalEditor
-              initialContent={descriptionRef.current}
-              onChange={handleDescriptionChange}
-            />
+            <LexicalEditor initialContent={descriptionRef.current}>
+              <EditorContentGetter editorRef={descriptionEditorRef} />
+            </LexicalEditor>
           </div>
           <div className="mt-4">
             <Title level={5}>文章正文</Title>
             <Form.Item name="content" hidden>
               <Input />
             </Form.Item>
-            <LexicalEditor initialContent={contentRef.current} onChange={handleContentChange} />
+            <LexicalEditor initialContent={contentRef.current}>
+              <EditorContentGetter editorRef={contentEditorRef} />
+            </LexicalEditor>
           </div>
         </div>
       </Form>
 
       {/* Modal for Visibility Settings */}
       <Modal
-        title="可见性设置"
         open={visibilityModalVisible}
         onCancel={() => setVisibilityModalVisible(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setVisibilityModalVisible(false)}>
-            取消
-          </Button>,
-          <Button key="save" type="primary" onClick={handleModalSubmit}>
-            保存
-          </Button>,
-          <Button
-            key="preview"
-            type="primary"
-            onClick={async () => {
-              await handleModalSubmit();
-              if (initialValues.id) {
-                history.push(`/blog/preview/${initialValues.id}`);
-              }
-            }}
-          >
-            保存并预览
-          </Button>,
-        ]}
+        footer={null}
+        destroyOnClose
+        centered
+        width={380}
+        maskClosable={false}
+        bodyStyle={{ padding: '20px' }}
       >
-        <Form form={form} layout="vertical">
-          <Form.Item label="可见性设置" name="visibilityType">
-            <Radio.Group>
-              <Radio value={1}>公开</Radio>
-              <Radio value={2}>私密</Radio>
-              <Radio value={3}>密码保护</Radio>
+        <Form
+          form={form}
+          layout="vertical"
+          requiredMark={false}
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        >
+          <Form.Item
+            name="visibilityType"
+            rules={[{ required: true, message: '请选择可见性类型' }]}
+            style={{ marginBottom: 0 }}
+          >
+            <Radio.Group style={{ width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+                {[
+                  { value: 1, icon: <EyeOutlined />, label: '公开', color: '#52c41a' },
+                  { value: 2, icon: <EyeInvisibleOutlined />, label: '私密', color: '#faad14' },
+                  { value: 3, icon: <LockOutlined />, label: '密码保护', color: '#1677ff' }
+                ].map(item => (
+                  <Radio
+                    value={item.value}
+                    key={item.value}
+                    style={{
+                      margin: 0,
+                      padding: 0,
+                      width: '100%',
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px 0',
+                      backgroundColor: form.getFieldValue('visibilityType') === item.value ? `${item.color}10` : 'transparent',
+                      borderRadius: '4px',
+                      height: '64px',
+                    }}>
+                      <span style={{ color: item.color, fontSize: '18px', marginBottom: '4px' }}>{item.icon}</span>
+                      <span style={{ fontSize: '12px' }}>{item.label}</span>
+                    </div>
+                  </Radio>
+                ))}
+              </div>
             </Radio.Group>
           </Form.Item>
-          {form.getFieldValue('visibilityType') === 3 && (
-            <Form.Item
-              label="访问密码"
-              name="password"
-              rules={[{ required: true, message: '请输入访问密码' }]}
-            >
-              <Input.Password />
-            </Form.Item>
-          )}
-          <Form.Item label="功能开关">
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item name="appreciation" valuePropName="checked" noStyle>
-                  <Checkbox>开启赞赏</Checkbox>
+
+          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.visibilityType !== curr.visibilityType}>
+            {({ getFieldValue }) =>
+              getFieldValue('visibilityType') === 3 && (
+                <Form.Item
+                  name="password"
+                  rules={[
+                    { required: true, message: '请输入访问密码' },
+                    { min: 4, message: '密码长度不能少于4位' },
+                  ]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined style={{ color: '#1677ff' }} />}
+                    placeholder="请输入访问密码"
+                    autoComplete="new-password"
+                    style={{ borderRadius: '4px', height: '32px' }}
+                  />
                 </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="recommend" valuePropName="checked" noStyle>
-                  <Checkbox>开启推荐</Checkbox>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="commentEnabled" valuePropName="checked" noStyle>
-                  <Checkbox>开启评论</Checkbox>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name="top" valuePropName="checked" noStyle>
-                  <Checkbox>开启置顶</Checkbox>
-                </Form.Item>
-              </Col>
-            </Row>
+              )
+            }
           </Form.Item>
+
+          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.visibilityType !== curr.visibilityType}>
+            {({ getFieldValue }) =>
+              getFieldValue('visibilityType') !== 2 && (
+                <div style={{ marginBottom: 0 }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '8px',
+                  }}>
+                    {[
+                      { name: 'appreciation', label: '赞赏功能' },
+                      { name: 'recommend', label: '推荐文章' },
+                      { name: 'commentEnabled', label: '评论功能' },
+                      { name: 'top', label: '置顶文章' }
+                    ].map(item => (
+                      <div key={item.name} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: '#eeefe9',
+                        padding: '6px 10px',
+                        borderRadius: '4px',
+                      }}>
+                        <span style={{
+                          color: 'rgba(0, 0, 0, 0.65)',
+                          fontSize: '12px',
+                        }}>
+                          {item.label}
+                        </span>
+                        <Form.Item name={item.name} valuePropName="checked" style={{ margin: 0 }}>
+                          <Switch size="small" />
+                        </Form.Item>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+          </Form.Item>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '8px',
+            marginTop: '4px'
+          }}>
+            <Button size="small" onClick={() => setVisibilityModalVisible(false)}>取消</Button>
+            <Button
+              size="small"
+              type="primary"
+              onClick={async () => {
+                try {
+                  // 验证必填字段
+                  await form.validateFields(['title', 'category', 'tags', 'firstPicture', 'visibilityType']);
+                  if (form.getFieldValue('visibilityType') === 3) {
+                    await form.validateFields(['password']);
+                  }
+                  await handleSubmit(form.getFieldsValue());
+                  setVisibilityModalVisible(false);
+                } catch (error) {
+                  console.error('验证失败:', error);
+                  if (error && (error as any).errorFields) {
+                    message.error('请填写必填字段: ' + (error as any).errorFields.map((f: any) => f.name[0]).join(', '));
+                  } else {
+                    message.error('表单验证失败，请检查必填字段');
+                  }
+                }
+              }}
+            >
+              保存
+            </Button>
+            <Button
+              size="small"
+              type="primary"
+              onClick={async () => {
+                try {
+                  // 验证必填字段
+                  await form.validateFields(['title', 'category', 'tags', 'firstPicture', 'visibilityType']);
+                  if (form.getFieldValue('visibilityType') === 3) {
+                    await form.validateFields(['password']);
+                  }
+                  await handleSubmit(form.getFieldsValue());
+                  if (initialValues.id) {
+                    history.push(`/blog/preview/${initialValues.id}`);
+                  }
+                } catch (error) {
+                  console.error('验证失败:', error);
+                  if (error && (error as any).errorFields) {
+                    message.error('请填写必填字段: ' + (error as any).errorFields.map((f: any) => f.name[0]).join(', '));
+                  } else {
+                    message.error('表单验证失败，请检查必填字段');
+                  }
+                }
+              }}
+            >
+              保存并预览
+            </Button>
+          </div>
         </Form>
       </Modal>
 
@@ -354,6 +491,13 @@ const BlogWrite: React.FC = () => {
           right: 20,
           zIndex: 1000,
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          fontSize: '16px',
         }}
         onClick={() => setVisibilityModalVisible(true)}
       >

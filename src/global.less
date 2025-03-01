@@ -1,4 +1,4 @@
-html
+html,
 body {
   background: rgb(238, 239, 233) !important;
 }
@@ -55,24 +55,49 @@ ol {
   }
 }
 
-// 设置整体背景色
+// 设置整体背景色 - 增强选择器优先级
+html,
+body,
+#root,
 .ant-layout,
-.ant-layout-content {
+.ant-layout-content,
+.ant-pro-layout {
   background: rgb(238, 239, 233) !important;
 }
 
 // 修改页面容器背景色
 .ant-pro-page-container,
-.ant-pro-page-container-children-content {
+.ant-pro-page-container-children-content,
+.ant-pro-page-container-warp,
+.ant-pro-grid-content,
+.ant-pro-grid-content-children {
   background: rgb(238, 239, 233) !important;
 }
-
 
 // 修改侧边栏和导航栏背景色
 .ant-layout-sider,
 .ant-pro-sider,
 .ant-layout-header,
-.ant-pro-top-nav-header {
+.ant-pro-top-nav-header,
+.ant-menu {
+  background: rgb(238, 239, 233) !important;
+}
+
+// 确保卡片和表格内容区域背景色正确
+.ant-card,
+.ant-card-body,
+.ant-table,
+.ant-table-container,
+.ant-table-content,
+.ant-pro-card,
+.ant-pro-card-body {
+  background: rgb(238, 239, 233) !important;
+}
+
+// 修复可能的滚动区域背景色
+.ant-pro-layout-content,
+.ant-pro-layout-container,
+.ant-pro-layout-children-content-wrap {
   background: rgb(238, 239, 233) !important;
 }
 

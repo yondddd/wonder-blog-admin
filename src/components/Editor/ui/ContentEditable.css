@@ -19,7 +19,7 @@
 }
 
 .ContentEditable__root::-webkit-scrollbar {
-  display: none;
+  display: true;
 }
 
 @media (max-width: 1025px) {
