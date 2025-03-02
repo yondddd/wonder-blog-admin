@@ -14,6 +14,8 @@ import {
   Select,
   Typography,
   Switch,
+  Space,
+  Divider,
 } from 'antd';
 import { history } from '@umijs/max';
 import LexicalEditor from '@/components/Editor';
@@ -22,7 +24,7 @@ import { listAllCategory } from '@/services/ant-design-pro/categoryApi';
 import { listAllTag } from '@/services/ant-design-pro/tagApi';
 import type { BlogItem, CategoryListItem, TagListItem } from '@/services/ant-design-pro/types';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { EyeOutlined, EyeInvisibleOutlined, LockOutlined } from '@ant-design/icons';
+import { EyeOutlined, EyeInvisibleOutlined, LockOutlined, FileImageOutlined, ReadOutlined, FieldTimeOutlined, EyeInvisibleFilled } from '@ant-design/icons';
 
 // 创建一个编辑器内容获取组件
 const EditorContentGetter = ({
@@ -56,7 +58,6 @@ const BlogWrite: React.FC = () => {
   const isChange = useRef(false);
 
   // 创建编辑器实例的ref
-  const descriptionEditorRef = useRef<any>(null);
   const contentEditorRef = useRef<any>(null);
 
   const { Title } = Typography;
@@ -65,15 +66,6 @@ const BlogWrite: React.FC = () => {
     isSubmittingRef.current = true;
     try {
       // 获取最新的编辑器内容
-      if (descriptionEditorRef.current) {
-        try {
-          const descriptionState = descriptionEditorRef.current.getEditorState();
-          descriptionRef.current = JSON.stringify(descriptionState.toJSON());
-        } catch (error) {
-          console.error('获取描述编辑器内容失败:', error);
-        }
-      }
-
       if (contentEditorRef.current) {
         try {
           const contentState = contentEditorRef.current.getEditorState();
@@ -85,11 +77,15 @@ const BlogWrite: React.FC = () => {
 
       const formValues = form.getFieldsValue(true);
       const isUpdate = Boolean(formValues.id);
+
+      // 直接使用表单中的description字段值
+      const description = formValues.description || '';
+
       const payload = {
         ...formValues,
         id: formValues.id,
         content: contentRef.current,
-        description: descriptionRef.current,
+        description: description, // 使用表单中的description
         category: { name: formValues.category },
         tags: (formValues.tags || []).map((t: string) => ({ name: t })),
         published: formValues.visibilityType !== 2,
@@ -99,11 +95,6 @@ const BlogWrite: React.FC = () => {
         commentEnabled: formValues.commentEnabled ?? false,
         top: formValues.top ?? false,
       };
-
-      console.log('保存的内容:', {
-        description: descriptionRef.current,
-        content: contentRef.current
-      });
 
       const result = await (isUpdate ? updateBlog : saveBlog)(payload);
       if (result.success) {
@@ -147,7 +138,6 @@ const BlogWrite: React.FC = () => {
       window.clearInterval(saveTimer.current);
     }
     saveTimer.current = window.setInterval(() => {
-      console.log('定时');
       if (!isSubmittingRef.current) {
         // 不再依赖isChange标记，直接检查并保存内容
         // 这样可以避免在用户未修改内容时进行不必要的保存
@@ -187,10 +177,10 @@ const BlogWrite: React.FC = () => {
             commentEnabled: blog.commentEnabled ?? false,
             top: blog.top ?? false,
             readTime: blog.readTime || 0,
+            description: blog.description || '', // 确保description正确设置到表单
           };
           form.setFieldsValue(values);
           contentRef.current = blog.content || '';
-          descriptionRef.current = blog.description || '';
           setInitialValues(blog);
         }
       });
@@ -204,20 +194,60 @@ const BlogWrite: React.FC = () => {
     };
   }, []);
 
+  // 监听description字段变化
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    descriptionRef.current = e.target.value;
+  };
+
   return (
     <PageContainer title={initialValues.id ? '编辑文章' : '新建文章'}>
-      <Form form={form} >
-        <div  style={{ background: 'rgb(238, 239, 233)' }}>
-          {/* Metadata Section */}
-          <Card style={{ background: 'rgb(238, 239, 233)' }}>
-            <Row gutter={16}>
+      <Form form={form} layout="vertical">
+        <div style={{ background: 'rgb(238, 239, 233)', padding: '16px', borderRadius: '8px' }}>
+          {/* 文章基本信息 */}
+          <Card
+            style={{
+              background: 'rgb(238, 239, 233)',
+              marginBottom: '16px',
+              border: 'none',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            }}
+          >
+            <Row gutter={24}>
               <Col span={8}>
-                <Form.Item label="文章标题" name="title" rules={[{ required: true }]}>
-                  <Input placeholder="请输入标题" />
+                <Form.Item
+                  label="文章标题"
+                  name="title"
+                  rules={[{ required: true, message: '请输入文章标题' }]}
+                >
+                  <Input
+                    placeholder="请输入标题"
+                    size="large"
+                    style={{ borderRadius: '6px' }}
+                  />
                 </Form.Item>
               </Col>
+              <Col span={16}>
+                <Form.Item
+                  label="文章首图"
+                  name="firstPicture"
+                  rules={[{ required: true, message: '请输入图片URL' }]}
+                >
+                  <Input
+                    placeholder="输入图片URL"
+                    prefix={<FileImageOutlined />}
+                    style={{ borderRadius: '6px' }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={24}>
               <Col span={8}>
-                <Form.Item label="分类" name="category" rules={[{ required: true }]}>
+                <Form.Item
+                  label="分类"
+                  name="category"
+                  rules={[{ required: true, message: '请选择或创建分类' }]}
+                >
                   <Select
                     showSearch
                     placeholder="选择或创建分类"
@@ -229,11 +259,16 @@ const BlogWrite: React.FC = () => {
                     filterOption={(input, option) =>
                       (option?.label as string).toLowerCase().includes(input.toLowerCase())
                     }
+                    style={{ borderRadius: '6px' }}
                   />
                 </Form.Item>
               </Col>
-              <Col span={8}>
-                <Form.Item label="标签" name="tags" rules={[{ required: true }]}>
+              <Col span={16}>
+                <Form.Item
+                  label="标签"
+                  name="tags"
+                  rules={[{ required: true, message: '请选择或创建标签' }]}
+                >
                   <Select
                     mode="multiple"
                     placeholder="选择或创建标签"
@@ -247,60 +282,76 @@ const BlogWrite: React.FC = () => {
                     }
                     showSearch
                     allowClear
+                    style={{ borderRadius: '6px' }}
                   />
                 </Form.Item>
               </Col>
             </Row>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item label="文章首图" name="firstPicture" rules={[{ required: true }]}>
-                  <Input placeholder="输入图片URL" />
+
+            <Row gutter={24}>
+              <Col span={8}>
+                <Form.Item
+                  label="字数统计"
+                  name="words"
+                >
+                  <Input
+                    type="number"
+                    prefix={<ReadOutlined />}
+                    style={{ borderRadius: '6px' }}
+                  />
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Row gutter={8}>
-                  <Col span={8}>
-                    <Form.Item label="字数统计" name="words">
-                      <Input type="number" />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label="阅读时长" name="readTime">
-                      <Input type="number" />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label="浏览次数" name="views">
-                      <Input type="number" />
-                    </Form.Item>
-                  </Col>
-                </Row>
+              <Col span={8}>
+                <Form.Item
+                  label="阅读时长(分钟)"
+                  name="readTime"
+                >
+                  <Input
+                    type="number"
+                    prefix={<FieldTimeOutlined />}
+                    style={{ borderRadius: '6px' }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  label="浏览次数"
+                  name="views"
+                >
+                  <Input
+                    type="number"
+                    prefix={<EyeOutlined />}
+                    style={{ borderRadius: '6px' }}
+                  />
+                </Form.Item>
               </Col>
             </Row>
           </Card>
 
-          {/* Content Section */}
+          {/* 文章摘要 */}
+          <div style={{ marginBottom: '24px' }}>
+            <Title level={5} style={{ marginBottom: '12px' }}>文章摘要</Title>
+            <Form.Item name="description">
+              <Input.TextArea
+                rows={4}
+                placeholder="请输入文章摘要"
+                autoSize={{ minRows: 4, maxRows: 8 }}
+                style={{ borderRadius: '6px', resize: 'none' }}
+                onChange={handleDescriptionChange}
+              />
+            </Form.Item>
+          </div>
+
+          {/* 文章正文 - 保持不变 */}
           <div>
-            <div>
-              <Title level={5}>文章摘要</Title>
-              <Form.Item name="description" hidden>
-                <Input />
-              </Form.Item>
-                <LexicalEditor initialContent={descriptionRef.current}>
-                  <EditorContentGetter editorRef={descriptionEditorRef} />
-                </LexicalEditor>
-            </div>
+            <Title level={5} style={{ marginBottom: '12px' }}>文章正文</Title>
+            <Form.Item name="content" hidden>
+              <Input />
+            </Form.Item>
 
-            <div >
-              <Title level={5}>文章正文</Title>
-              <Form.Item name="content" hidden>
-                <Input />
-              </Form.Item>
-
-                <LexicalEditor initialContent={contentRef.current}>
-                  <EditorContentGetter editorRef={contentEditorRef} />
-                </LexicalEditor>
-            </div>
+            <LexicalEditor initialContent={contentRef.current}>
+              <EditorContentGetter editorRef={contentEditorRef} />
+            </LexicalEditor>
           </div>
         </div>
       </Form>
