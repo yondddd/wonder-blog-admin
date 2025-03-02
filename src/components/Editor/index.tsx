@@ -12,7 +12,6 @@ import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import LexicalClickableLinkPlugin, {ClickableLinkPlugin} from '@lexical/react/LexicalClickableLinkPlugin';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
@@ -65,7 +64,6 @@ import YouTubePlugin from './plugins/YouTubePlugin';
 import ContentEditable from './ui/ContentEditable';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import PlaygroundNodes from '@/components/Editor/nodes/PlaygroundNodes';
-import './index.css';
 import theme from '@/components/Editor/themes/PlaygroundEditorTheme';
 import { TableContext } from '@/components/Editor/plugins/TablePlugin';
 import Settings from '@/components/Editor/Settings';
@@ -78,6 +76,11 @@ import { FlashMessageContext } from '@/components/Editor/context/FlashMessageCon
 import React from 'react';
 import {useLexicalEditable} from "@lexical/react/useLexicalEditable";
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {LexicalErrorBoundary} from "@lexical/react/LexicalErrorBoundary";
+import './index.css';
+
+// Define the missing skipCollaborationInit variable
+const skipCollaborationInit = true;
 
 // 基础接口，包含共有属性
 interface BaseEditorProps {

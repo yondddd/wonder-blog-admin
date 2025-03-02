@@ -10,8 +10,12 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, '.SFNSText-Regular',
-  sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    '.SFNSText-Regular',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #eee;
@@ -48,7 +52,7 @@ header h1 {
 .editor-shell {
   margin: 20px auto;
   border-radius: 2px;
-  max-width: 1100px;
+  max-width: 65%;
   color: #000;
   position: relative;
   line-height: 1.7;
@@ -260,83 +264,83 @@ pre::-webkit-scrollbar-thumb {
 }
 
 .typeahead-popover {
-  background: #fff;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  position: fixed;
+  background: #fff !important;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  position: fixed !important;
 }
 
 .typeahead-popover ul {
-  padding: 0;
-  list-style: none;
-  margin: 0;
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: scroll;
+  padding: 0 !important;
+  list-style: none !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  max-height: 200px !important;
+  overflow-y: scroll !important;
 }
 
 .typeahead-popover ul::-webkit-scrollbar {
-  display: none;
+  display: none !important;
 }
 
 .typeahead-popover ul {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 .typeahead-popover ul li {
-  margin: 0;
-  min-width: 180px;
-  font-size: 14px;
-  outline: none;
-  cursor: pointer;
-  border-radius: 8px;
+  margin: 0 !important;
+  min-width: 180px !important;
+  font-size: 14px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  border-radius: 8px !important;
 }
 
 .typeahead-popover ul li.selected {
-  background: #eee;
+  background: #eee !important;
 }
 
 .typeahead-popover li {
-  margin: 0 8px 0 8px;
-  padding: 8px;
-  color: #050505;
-  cursor: pointer;
-  line-height: 16px;
-  font-size: 15px;
-  display: flex;
-  align-content: center;
-  flex-direction: row;
-  flex-shrink: 0;
-  background-color: #fff;
-  border-radius: 8px;
-  border: 0;
+  margin: 0 8px 0 8px !important;
+  padding: 8px !important;
+  color: #050505 !important;
+  cursor: pointer !important;
+  line-height: 16px !important;
+  font-size: 15px !important;
+  display: flex !important;
+  align-content: center !important;
+  flex-direction: row !important;
+  flex-shrink: 0 !important;
+  background-color: #fff !important;
+  border-radius: 8px !important;
+  border: 0 !important;
 }
 
 .typeahead-popover li.active {
-  display: flex;
-  width: 20px;
-  height: 20px;
-  background-size: contain;
+  display: flex !important;
+  width: 20px !important;
+  height: 20px !important;
+  background-size: contain !important;
 }
 
 .typeahead-popover li:first-child {
-  border-radius: 8px 8px 0px 0px;
+  border-radius: 8px 8px 0px 0px !important;
 }
 
 .typeahead-popover li:last-child {
-  border-radius: 0px 0px 8px 8px;
+  border-radius: 0px 0px 8px 8px !important;
 }
 
 .typeahead-popover li:hover {
-  background-color: #eee;
+  background-color: #eee !important;
 }
 
 .typeahead-popover li .text {
-  display: flex;
-  line-height: 20px;
-  flex-grow: 1;
-  min-width: 150px;
+  display: flex !important;
+  line-height: 20px !important;
+  flex-grow: 1 !important;
+  min-width: 150px !important;
 }
 
 .typeahead-popover li .icon {
@@ -757,8 +761,10 @@ i.page-break,
   z-index: 100;
   display: block;
   position: fixed;
-  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1),
-  inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 12px 28px 0 rgba(0, 0, 0, 0.2),
+    0 2px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   border-radius: 8px;
   min-height: 40px;
   background-color: #fff;
@@ -1498,7 +1504,7 @@ button.action-button:disabled {
   border-top-right-radius: 10px;
   vertical-align: middle;
   overflow: auto;
-  height: 36px;
+  height: 42px;
   position: sticky;
   top: 0;
   z-index: 2;
@@ -1649,24 +1655,12 @@ button.toolbar-item.active i {
 
 .sticky-note.yellow {
   border-top: 1px solid #fdfd86;
-  background: linear-gradient(
-    135deg,
-    #ffff88 81%,
-    #ffff88 82%,
-    #ffff88 82%,
-    #ffffc6 100%
-  );
+  background: linear-gradient(135deg, #ffff88 81%, #ffff88 82%, #ffff88 82%, #ffffc6 100%);
 }
 
 .sticky-note.pink {
   border-top: 1px solid #e7d1e4;
-  background: linear-gradient(
-    135deg,
-    #f7cbe8 81%,
-    #f7cbe8 82%,
-    #f7cbe8 82%,
-    #e7bfe1 100%
-  );
+  background: linear-gradient(135deg, #f7cbe8 81%, #f7cbe8 82%, #f7cbe8 82%, #e7bfe1 100%);
 }
 
 .sticky-note-container.dragging {
