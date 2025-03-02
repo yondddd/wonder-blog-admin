@@ -52,8 +52,8 @@ export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> =
   createCommand('INSERT_IMAGE_COMMAND');
 
 export function InsertImageUriDialogBody({
-  onClick,
-}: {
+                                           onClick,
+                                         }: {
   onClick: (payload: InsertImagePayload) => void;
 }) {
   const [src, setSrc] = useState('');
@@ -90,8 +90,8 @@ export function InsertImageUriDialogBody({
 }
 
 export function InsertImageUploadedDialogBody({
-  onClick,
-}: {
+                                                onClick,
+                                              }: {
   onClick: (payload: InsertImagePayload) => void;
 }) {
   const [src, setSrc] = useState('');
@@ -140,9 +140,9 @@ export function InsertImageUploadedDialogBody({
 }
 
 export function InsertImageDialog({
-  activeEditor,
-  onClose,
-}: {
+                                    activeEditor,
+                                    onClose,
+                                  }: {
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {
@@ -175,14 +175,14 @@ export function InsertImageDialog({
               onClick(
                 hasModifier.current
                   ? {
-                      altText:
-                        'Daylight fir trees forest glacier green high ice landscape',
-                      src: landscapeImage,
-                    }
+                    altText:
+                      'Daylight fir trees forest glacier green high ice landscape',
+                    src: landscapeImage,
+                  }
                   : {
-                      altText: 'Yellow flower in tilt shift lens',
-                      src: yellowFlowerImage,
-                    },
+                    altText: 'Yellow flower in tilt shift lens',
+                    src: yellowFlowerImage,
+                  },
               )
             }>
             Sample
@@ -206,8 +206,8 @@ export function InsertImageDialog({
 }
 
 export default function ImagesPlugin({
-  captionsEnabled,
-}: {
+                                       captionsEnabled,
+                                     }: {
   captionsEnabled?: boolean;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();

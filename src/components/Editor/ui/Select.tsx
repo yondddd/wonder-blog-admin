@@ -18,11 +18,11 @@ interface SelectProps extends SelectIntrinsicProps {
 }
 
 export default function Select({
-  children,
-  label,
-  className,
-  ...other
-}: SelectProps): JSX.Element {
+                                 children,
+                                 label,
+                                 className,
+                                 ...other
+                               }: SelectProps): JSX.Element {
   return (
     <div className="Input__wrapper">
       <label style={{marginTop: '-1em'}} className="Input__label">

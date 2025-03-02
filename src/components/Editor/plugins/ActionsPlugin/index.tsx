@@ -93,9 +93,9 @@ async function shareDoc(doc: SerializedDocument): Promise<void> {
 }
 
 export default function ActionsPlugin({
-  isRichText,
-  shouldPreserveNewLinesInMarkdown,
-}: {
+                                        isRichText,
+                                        shouldPreserveNewLinesInMarkdown,
+                                      }: {
   isRichText: boolean;
   shouldPreserveNewLinesInMarkdown: boolean;
 }): JSX.Element {
@@ -303,9 +303,9 @@ export default function ActionsPlugin({
 }
 
 function ShowClearDialog({
-  editor,
-  onClose,
-}: {
+                           editor,
+                           onClose,
+                         }: {
   editor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {

@@ -90,15 +90,15 @@ function useSuspenseImage(src: string) {
 }
 
 function LazyImage({
-  altText,
-  className,
-  imageRef,
-  src,
-  width,
-  height,
-  maxWidth,
-  onError,
-}: {
+                     altText,
+                     className,
+                     imageRef,
+                     src,
+                     width,
+                     height,
+                     maxWidth,
+                     onError,
+                   }: {
   altText: string;
   className: string | null;
   height: 'inherit' | number;
@@ -141,17 +141,17 @@ function BrokenImage(): JSX.Element {
 }
 
 export default function ImageComponent({
-  src,
-  altText,
-  nodeKey,
-  width,
-  height,
-  maxWidth,
-  resizable,
-  showCaption,
-  caption,
-  captionsEnabled,
-}: {
+                                         src,
+                                         altText,
+                                         nodeKey,
+                                         width,
+                                         height,
+                                         maxWidth,
+                                         resizable,
+                                         showCaption,
+                                         caption,
+                                         captionsEnabled,
+                                       }: {
   altText: string;
   caption: LexicalEditor;
   height: 'inherit' | number;
@@ -285,12 +285,14 @@ export default function ImageComponent({
   );
 
   useEffect(() => {
-    let isMounted = true;
     const rootElement = editor.getRootElement();
     const unregister = mergeRegister(
       editor.registerUpdateListener(({editorState}) => {
-        if (isMounted) {
-          setSelection(editorState.read(() => $getSelection()));
+        const updatedSelection = editorState.read(() => $getSelection());
+        if ($isNodeSelection(updatedSelection)) {
+          setSelection(updatedSelection);
+        } else {
+          setSelection(null);
         }
       }),
       editor.registerCommand(
@@ -345,7 +347,6 @@ export default function ImageComponent({
     rootElement?.addEventListener('contextmenu', onRightClick);
 
     return () => {
-      isMounted = false;
       unregister();
       rootElement?.removeEventListener('contextmenu', onRightClick);
     };

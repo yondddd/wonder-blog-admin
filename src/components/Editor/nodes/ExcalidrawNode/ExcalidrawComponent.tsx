@@ -32,11 +32,11 @@ import {$isExcalidrawNode} from '.';
 import ExcalidrawImage from './ExcalidrawImage';
 
 export default function ExcalidrawComponent({
-  nodeKey,
-  data,
-  width,
-  height,
-}: {
+                                              nodeKey,
+                                              data,
+                                              width,
+                                              height,
+                                            }: {
   data: string;
   nodeKey: NodeKey;
   width: 'inherit' | number;

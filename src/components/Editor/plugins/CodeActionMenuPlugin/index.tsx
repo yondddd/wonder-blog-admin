@@ -34,8 +34,8 @@ interface Position {
 }
 
 function CodeActionMenuContainer({
-  anchorElem,
-}: {
+                                   anchorElem,
+                                 }: {
   anchorElem: HTMLElement;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
@@ -181,8 +181,8 @@ function getMouseInfo(event: MouseEvent): {
 }
 
 export default function CodeActionMenuPlugin({
-  anchorElem = document.body,
-}: {
+                                               anchorElem = document.body,
+                                             }: {
   anchorElem?: HTMLElement;
 }): React.ReactPortal | null {
   return createPortal(

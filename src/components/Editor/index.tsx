@@ -10,7 +10,7 @@ import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { CharacterLimitPlugin } from '@lexical/react/LexicalCharacterLimitPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
-import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin';
+import LexicalClickableLinkPlugin, {ClickableLinkPlugin} from '@lexical/react/LexicalClickableLinkPlugin';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin';
@@ -18,12 +18,9 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
-import useLexicalEditable from '@lexical/react/useLexicalEditable';
 import { useEffect, useState } from 'react';
-import { CAN_USE_DOM } from '@/components/Editor/shared/src/canUseDOM';
 import { createWebsocketProvider } from './collaboration';
 import { SettingsContext, useSettings } from './context/SettingsContext';
 import { SharedHistoryContext, useSharedHistoryContext } from './context/SharedHistoryContext';
@@ -79,10 +76,8 @@ import ShortcutsPlugin from '@/components/Editor/plugins/ShortcutsPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { FlashMessageContext } from '@/components/Editor/context/FlashMessageContext';
 import React from 'react';
-
-const skipCollaborationInit =
-  // @ts-expect-error
-  window.parent !== null && window.parent.frames.right === window;
+import {useLexicalEditable} from "@lexical/react/useLexicalEditable";
+import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
 
 // 基础接口，包含共有属性
 interface BaseEditorProps {
@@ -197,7 +192,15 @@ function Editor({
         <CommentPlugin providerFactory={isCollab ? createWebsocketProvider : undefined} />
         {isRichText ? (
           <>
-            <HistoryPlugin externalHistoryState={historyState} />
+            {isCollab ? (
+              <CollaborationPlugin
+                id="main"
+                providerFactory={createWebsocketProvider}
+                shouldBootstrap={!skipCollaborationInit}
+              />
+            ) : (
+              <HistoryPlugin externalHistoryState={historyState} />
+            )}
             <RichTextPlugin
               contentEditable={
                 <div className="editor-scroller">
@@ -225,16 +228,35 @@ function Editor({
             <TwitterPlugin />
             <YouTubePlugin />
             <FigmaPlugin />
-            {!isEditable && <LexicalClickableLinkPlugin />}
+            <ClickableLinkPlugin disabled={isEditable} />
             <HorizontalRulePlugin />
             <EquationsPlugin />
             <ExcalidrawPlugin />
             <TabFocusPlugin />
-            <TabIndentationPlugin />
+            <TabIndentationPlugin maxIndent={7} />
             <CollapsiblePlugin />
             <PageBreakPlugin />
             <LayoutPlugin />
-            {floatingAnchorElementPlugins}
+            {floatingAnchorElem && (
+              <>
+                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
+                <FloatingLinkEditorPlugin
+                  anchorElem={floatingAnchorElem}
+                  isLinkEditMode={isLinkEditMode}
+                  setIsLinkEditMode={setIsLinkEditMode}
+                />
+                <TableCellActionMenuPlugin
+                  anchorElem={floatingAnchorElem}
+                  cellMerge={true}
+                />
+                <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
+                <FloatingTextFormatToolbarPlugin
+                  anchorElem={floatingAnchorElem}
+                  setIsLinkEditMode={setIsLinkEditMode}
+                />
+              </>
+            )}
           </>
         ) : (
           <>

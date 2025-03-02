@@ -30,12 +30,12 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 function ContextMenuItem({
-  index,
-  isSelected,
-  onClick,
-  onMouseEnter,
-  option,
-}: {
+                           index,
+                           isSelected,
+                           onClick,
+                           onMouseEnter,
+                           option,
+                         }: {
   index: number;
   isSelected: boolean;
   onClick: () => void;
@@ -63,11 +63,11 @@ function ContextMenuItem({
 }
 
 function ContextMenu({
-  options,
-  selectedItemIndex,
-  onOptionClick,
-  onOptionMouseEnter,
-}: {
+                       options,
+                       selectedItemIndex,
+                       onOptionClick,
+                       onOptionMouseEnter,
+                     }: {
   selectedItemIndex: number | null;
   onOptionClick: (option: ContextMenuOption, index: number) => void;
   onOptionMouseEnter: (index: number) => void;
@@ -252,28 +252,28 @@ export default function ContextMenuPlugin(): JSX.Element {
       ) =>
         anchorElementRef.current
           ? ReactDOM.createPortal(
-              <div
-                className="typeahead-popover auto-embed-menu"
-                style={{
-                  marginLeft: anchorElementRef.current.style.width,
-                  userSelect: 'none',
-                  width: 200,
+            <div
+              className="typeahead-popover auto-embed-menu"
+              style={{
+                marginLeft: anchorElementRef.current.style.width,
+                userSelect: 'none',
+                width: 200,
+              }}
+              ref={setMenuRef}>
+              <ContextMenu
+                options={options}
+                selectedItemIndex={selectedIndex}
+                onOptionClick={(option: ContextMenuOption, index: number) => {
+                  setHighlightedIndex(index);
+                  selectOptionAndCleanUp(option);
                 }}
-                ref={setMenuRef}>
-                <ContextMenu
-                  options={options}
-                  selectedItemIndex={selectedIndex}
-                  onOptionClick={(option: ContextMenuOption, index: number) => {
-                    setHighlightedIndex(index);
-                    selectOptionAndCleanUp(option);
-                  }}
-                  onOptionMouseEnter={(index: number) => {
-                    setHighlightedIndex(index);
-                  }}
-                />
-              </div>,
-              anchorElementRef.current,
-            )
+                onOptionMouseEnter={(index: number) => {
+                  setHighlightedIndex(index);
+                }}
+              />
+            </div>,
+            anchorElementRef.current,
+          )
           : null
       }
     />

@@ -84,14 +84,14 @@ const removeStyleFromSvg_HACK = (svg: SVGElement) => {
  * A component for rendering Excalidraw elements as a static image
  */
 export default function ExcalidrawImage({
-  elements,
-  files,
-  imageContainerRef,
-  appState,
-  rootClassName = null,
-  width = 'inherit',
-  height = 'inherit',
-}: Props): JSX.Element {
+                                          elements,
+                                          files,
+                                          imageContainerRef,
+                                          appState,
+                                          rootClassName = null,
+                                          width = 'inherit',
+                                          height = 'inherit',
+                                        }: Props): JSX.Element {
   const [Svg, setSvg] = useState<SVGElement | null>(null);
 
   useEffect(() => {

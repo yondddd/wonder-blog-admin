@@ -29,11 +29,11 @@ const DropDownContext = React.createContext<DropDownContextType | null>(null);
 const dropDownPadding = 4;
 
 export function DropDownItem({
-  children,
-  className,
-  onClick,
-  title,
-}: {
+                               children,
+                               className,
+                               onClick,
+                               title,
+                             }: {
   children: React.ReactNode;
   className: string;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -68,10 +68,10 @@ export function DropDownItem({
 }
 
 function DropDownItems({
-  children,
-  dropDownRef,
-  onClose,
-}: {
+                         children,
+                         dropDownRef,
+                         onClose,
+                       }: {
   children: React.ReactNode;
   dropDownRef: React.Ref<HTMLDivElement>;
   onClose: () => void;
@@ -145,14 +145,14 @@ function DropDownItems({
 }
 
 export default function DropDown({
-  disabled = false,
-  buttonLabel,
-  buttonAriaLabel,
-  buttonClassName,
-  buttonIconClassName,
-  children,
-  stopCloseOnClickSelf,
-}: {
+                                   disabled = false,
+                                   buttonLabel,
+                                   buttonAriaLabel,
+                                   buttonClassName,
+                                   buttonIconClassName,
+                                   children,
+                                   stopCloseOnClickSelf,
+                                 }: {
   disabled?: boolean;
   buttonAriaLabel?: string;
   buttonClassName: string;

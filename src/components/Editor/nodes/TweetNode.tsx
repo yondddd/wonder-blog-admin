@@ -56,14 +56,14 @@ function $convertTweetElement(
 let isTwitterScriptLoading = true;
 
 function TweetComponent({
-  className,
-  format,
-  loadingComponent,
-  nodeKey,
-  onError,
-  onLoad,
-  tweetID,
-}: TweetComponentProps) {
+                          className,
+                          format,
+                          loadingComponent,
+                          nodeKey,
+                          onError,
+                          onLoad,
+                          tweetID,
+                        }: TweetComponentProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const previousTweetIDRef = useRef<string>('');

@@ -12,11 +12,11 @@ import * as React from 'react';
 import {useMemo} from 'react';
 
 export default function Switch({
-  checked,
-  onClick,
-  text,
-  id,
-}: Readonly<{
+                                 checked,
+                                 onClick,
+                                 text,
+                                 id,
+                               }: Readonly<{
   checked: boolean;
   id?: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;

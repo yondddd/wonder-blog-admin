@@ -133,3 +133,4 @@ export function $isMentionNode(
 ): node is MentionNode {
   return node instanceof MentionNode;
 }
+

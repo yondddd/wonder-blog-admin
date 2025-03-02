@@ -24,12 +24,12 @@ type Props = {
 };
 
 export default function DropdownColorPicker({
-  disabled = false,
-  stopCloseOnClickSelf = true,
-  color,
-  onChange,
-  ...rest
-}: Props) {
+                                              disabled = false,
+                                              stopCloseOnClickSelf = true,
+                                              color,
+                                              onChange,
+                                              ...rest
+                                            }: Props) {
   return (
     <DropDown
       {...rest}

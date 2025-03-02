@@ -23,13 +23,13 @@ type Props = Readonly<{
 }>;
 
 export default function TextInput({
-  label,
-  value,
-  onChange,
-  placeholder = '',
-  'data-test-id': dataTestId,
-  type = 'text',
-}: Props): JSX.Element {
+                                    label,
+                                    value,
+                                    onChange,
+                                    placeholder = '',
+                                    'data-test-id': dataTestId,
+                                    type = 'text',
+                                  }: Props): JSX.Element {
   return (
     <div className="Input__wrapper">
       <label className="Input__label">{label}</label>

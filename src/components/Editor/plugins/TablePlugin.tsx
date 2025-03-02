@@ -80,9 +80,9 @@ export function TableContext({children}: {children: JSX.Element}) {
 }
 
 export function InsertTableDialog({
-  activeEditor,
-  onClose,
-}: {
+                                    activeEditor,
+                                    onClose,
+                                  }: {
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {
@@ -137,9 +137,9 @@ export function InsertTableDialog({
 }
 
 export function TablePlugin({
-  cellEditorConfig,
-  children,
-}: {
+                              cellEditorConfig,
+                              children,
+                            }: {
   cellEditorConfig: CellEditorConfig;
   children: JSX.Element | Array<JSX.Element>;
 }): JSX.Element | null {

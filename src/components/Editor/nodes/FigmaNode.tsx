@@ -34,11 +34,11 @@ type FigmaComponentProps = Readonly<{
 }>;
 
 function FigmaComponent({
-  className,
-  format,
-  nodeKey,
-  documentID,
-}: FigmaComponentProps) {
+                          className,
+                          format,
+                          nodeKey,
+                          documentID,
+                        }: FigmaComponentProps) {
   return (
     <BlockWithAlignableContents
       className={className}

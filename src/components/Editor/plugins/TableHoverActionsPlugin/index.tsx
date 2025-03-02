@@ -30,15 +30,16 @@ import * as React from 'react';
 import {createPortal} from 'react-dom';
 
 import {useDebounce} from '../CodeActionMenuPlugin/utils';
+import {getThemeSelector} from "@/components/Editor/utils/getThemeSelector";
 
 const BUTTON_WIDTH_PX = 20;
 
 function TableHoverActionsContainer({
-  anchorElem,
-}: {
+                                      anchorElem,
+                                    }: {
   anchorElem: HTMLElement;
 }): JSX.Element | null {
-  const [editor] = useLexicalComposerContext();
+  const [editor, {getTheme}] = useLexicalComposerContext();
   const isEditable = useLexicalEditable();
   const [isShownRow, setShownRow] = useState<boolean>(false);
   const [isShownColumn, setShownColumn] = useState<boolean>(false);
@@ -50,7 +51,7 @@ function TableHoverActionsContainer({
 
   const debouncedOnMouseMove = useDebounce(
     (event: MouseEvent) => {
-      const {isOutside, tableDOMNode} = getMouseInfo(event);
+      const {isOutside, tableDOMNode} = getMouseInfo(event, getTheme);
 
       if (isOutside) {
         setShownRow(false);
@@ -256,14 +257,14 @@ function TableHoverActionsContainer({
     <>
       {isShownRow && (
         <button
-          className={'PlaygroundEditorTheme__tableAddRows'}
+          className={`${getTheme()?.tableAddRows}`}
           style={{...position}}
           onClick={() => insertAction(true)}
         />
       )}
       {isShownColumn && (
         <button
-          className={'PlaygroundEditorTheme__tableAddColumns'}
+          className={`${getTheme()?.tableAddColumns}`}
           style={{...position}}
           onClick={() => insertAction(false)}
         />
@@ -272,24 +273,28 @@ function TableHoverActionsContainer({
   );
 }
 
-function getMouseInfo(event: MouseEvent): {
+function getMouseInfo(
+  event: MouseEvent,
+  getTheme: () => EditorThemeClasses | null | undefined,
+): {
   tableDOMNode: HTMLElement | null;
   isOutside: boolean;
 } {
   const target = event.target;
+  const tableCellClass = getThemeSelector(getTheme, 'tableCell');
 
   if (isHTMLElement(target)) {
     const tableDOMNode = target.closest<HTMLElement>(
-      'td.PlaygroundEditorTheme__tableCell, th.PlaygroundEditorTheme__tableCell',
+      `td${tableCellClass}, th${tableCellClass}`,
     );
 
     const isOutside = !(
       tableDOMNode ||
       target.closest<HTMLElement>(
-        'button.PlaygroundEditorTheme__tableAddRows',
+        `button${getThemeSelector(getTheme, 'tableAddRows')}`,
       ) ||
       target.closest<HTMLElement>(
-        'button.PlaygroundEditorTheme__tableAddColumns',
+        `button${getThemeSelector(getTheme, 'tableAddColumns')}`,
       ) ||
       target.closest<HTMLElement>('div.TableCellResizer__resizer')
     );
@@ -301,16 +306,16 @@ function getMouseInfo(event: MouseEvent): {
 }
 
 export default function TableHoverActionsPlugin({
-  anchorElem = document.body,
-}: {
+                                                  anchorElem = document.body,
+                                                }: {
   anchorElem?: HTMLElement;
 }): React.ReactPortal | null {
   const isEditable = useLexicalEditable();
 
   return isEditable
     ? createPortal(
-        <TableHoverActionsContainer anchorElem={anchorElem} />,
-        anchorElem,
-      )
+      <TableHoverActionsContainer anchorElem={anchorElem} />,
+      anchorElem,
+    )
     : null;
 }

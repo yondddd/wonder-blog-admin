@@ -16,11 +16,11 @@ import {ReactNode, useEffect, useRef} from 'react';
 import {createPortal} from 'react-dom';
 
 function PortalImpl({
-  onClose,
-  children,
-  title,
-  closeOnClickOutside,
-}: {
+                      onClose,
+                      children,
+                      title,
+                      closeOnClickOutside,
+                    }: {
   children: ReactNode;
   closeOnClickOutside: boolean;
   onClose: () => void;
@@ -88,11 +88,11 @@ function PortalImpl({
 }
 
 export default function Modal({
-  onClose,
-  children,
-  title,
-  closeOnClickOutside = false,
-}: {
+                                onClose,
+                                children,
+                                title,
+                                closeOnClickOutside = false,
+                              }: {
   children: ReactNode;
   closeOnClickOutside?: boolean;
   onClose: () => void;

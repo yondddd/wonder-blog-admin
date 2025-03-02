@@ -35,21 +35,21 @@ import {setFloatingElemPosition} from '../../utils/setFloatingElemPosition';
 import {INSERT_INLINE_COMMAND} from '../CommentPlugin';
 
 function TextFormatFloatingToolbar({
-  editor,
-  anchorElem,
-  isLink,
-  isBold,
-  isItalic,
-  isUnderline,
-  isUppercase,
-  isLowercase,
-  isCapitalize,
-  isCode,
-  isStrikethrough,
-  isSubscript,
-  isSuperscript,
-  setIsLinkEditMode,
-}: {
+                                     editor,
+                                     anchorElem,
+                                     isLink,
+                                     isBold,
+                                     isItalic,
+                                     isUnderline,
+                                     isUppercase,
+                                     isLowercase,
+                                     isCapitalize,
+                                     isCode,
+                                     isStrikethrough,
+                                     isSubscript,
+                                     isSuperscript,
+                                     setIsLinkEditMode,
+                                   }: {
   editor: LexicalEditor;
   anchorElem: HTMLElement;
   isBold: boolean;
@@ -444,9 +444,9 @@ function useFloatingTextFormatToolbar(
 }
 
 export default function FloatingTextFormatToolbarPlugin({
-  anchorElem = document.body,
-  setIsLinkEditMode,
-}: {
+                                                          anchorElem = document.body,
+                                                          setIsLinkEditMode,
+                                                        }: {
   anchorElem?: HTMLElement;
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element | null {

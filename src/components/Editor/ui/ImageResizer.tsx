@@ -25,16 +25,16 @@ const Direction = {
 };
 
 export default function ImageResizer({
-  onResizeStart,
-  onResizeEnd,
-  buttonRef,
-  imageRef,
-  maxWidth,
-  editor,
-  showCaption,
-  setShowCaption,
-  captionsEnabled,
-}: {
+                                       onResizeStart,
+                                       onResizeEnd,
+                                       buttonRef,
+                                       imageRef,
+                                       maxWidth,
+                                       editor,
+                                       showCaption,
+                                       setShowCaption,
+                                       captionsEnabled,
+                                     }: {
   editor: LexicalEditor;
   buttonRef: {current: null | HTMLButtonElement};
   imageRef: {current: null | HTMLElement};
@@ -76,8 +76,8 @@ export default function ImageResizer({
   const maxWidthContainer = maxWidth
     ? maxWidth
     : editorRootElement !== null
-    ? editorRootElement.getBoundingClientRect().width - 20
-    : 100;
+      ? editorRootElement.getBoundingClientRect().width - 20
+      : 100;
   const maxHeightContainer =
     editorRootElement !== null
       ? editorRootElement.getBoundingClientRect().height - 20

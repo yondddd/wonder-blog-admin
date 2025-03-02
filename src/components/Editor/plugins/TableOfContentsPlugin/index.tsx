@@ -45,8 +45,8 @@ function isHeadingBelowTheTopOfThePage(element: HTMLElement): boolean {
 }
 
 function TableOfContentsList({
-  tableOfContents,
-}: {
+                               tableOfContents,
+                             }: {
   tableOfContents: Array<TableOfContentsEntry>;
 }): JSX.Element {
   const [selectedKey, setSelectedKey] = useState('');
@@ -80,7 +80,7 @@ function TableOfContentsList({
               currentHeading !== null &&
               isHeadingBelowTheTopOfThePage(currentHeading) &&
               selectedIndex.current > 0
-            ) {
+              ) {
               const prevHeading = editor.getElementByKey(
                 tableOfContents[selectedIndex.current - 1][0],
               );
@@ -101,7 +101,7 @@ function TableOfContentsList({
               currentHeading !== null &&
               isHeadingAboveViewport(currentHeading) &&
               selectedIndex.current < tableOfContents.length - 1
-            ) {
+              ) {
               const nextHeading = editor.getElementByKey(
                 tableOfContents[selectedIndex.current + 1][0],
               );

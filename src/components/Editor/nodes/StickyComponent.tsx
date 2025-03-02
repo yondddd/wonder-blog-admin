@@ -52,12 +52,12 @@ function positionSticky(
 }
 
 export default function StickyComponent({
-  x,
-  y,
-  nodeKey,
-  color,
-  caption,
-}: {
+                                          x,
+                                          y,
+                                          nodeKey,
+                                          color,
+                                          caption,
+                                        }: {
   caption: LexicalEditor;
   color: 'pink' | 'yellow';
   nodeKey: NodeKey;

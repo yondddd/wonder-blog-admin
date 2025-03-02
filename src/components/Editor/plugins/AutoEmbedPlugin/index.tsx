@@ -156,12 +156,12 @@ export const EmbedConfigs = [
 ];
 
 function AutoEmbedMenuItem({
-  index,
-  isSelected,
-  onClick,
-  onMouseEnter,
-  option,
-}: {
+                             index,
+                             isSelected,
+                             onClick,
+                             onMouseEnter,
+                             option,
+                           }: {
   index: number;
   isSelected: boolean;
   onClick: () => void;
@@ -189,11 +189,11 @@ function AutoEmbedMenuItem({
 }
 
 function AutoEmbedMenu({
-  options,
-  selectedItemIndex,
-  onOptionClick,
-  onOptionMouseEnter,
-}: {
+                         options,
+                         selectedItemIndex,
+                         onOptionClick,
+                         onOptionMouseEnter,
+                       }: {
   selectedItemIndex: number | null;
   onOptionClick: (option: AutoEmbedOption, index: number) => void;
   onOptionMouseEnter: (index: number) => void;
@@ -228,9 +228,9 @@ const debounce = (callback: (text: string) => void, delay: number) => {
 };
 
 export function AutoEmbedDialog({
-  embedConfig,
-  onClose,
-}: {
+                                  embedConfig,
+                                  onClose,
+                                }: {
   embedConfig: PlaygroundEmbedConfig;
   onClose: () => void;
 }): JSX.Element {
@@ -327,29 +327,29 @@ export default function AutoEmbedPlugin(): JSX.Element {
         ) =>
           anchorElementRef.current
             ? ReactDOM.createPortal(
-                <div
-                  className="typeahead-popover auto-embed-menu"
-                  style={{
-                    marginLeft: `${Math.max(
-                      parseFloat(anchorElementRef.current.style.width) - 200,
-                      0,
-                    )}px`,
-                    width: 200,
-                  }}>
-                  <AutoEmbedMenu
-                    options={options}
-                    selectedItemIndex={selectedIndex}
-                    onOptionClick={(option: AutoEmbedOption, index: number) => {
-                      setHighlightedIndex(index);
-                      selectOptionAndCleanUp(option);
-                    }}
-                    onOptionMouseEnter={(index: number) => {
-                      setHighlightedIndex(index);
-                    }}
-                  />
-                </div>,
-                anchorElementRef.current,
-              )
+              <div
+                className="typeahead-popover auto-embed-menu"
+                style={{
+                  marginLeft: `${Math.max(
+                    parseFloat(anchorElementRef.current.style.width) - 200,
+                    0,
+                  )}px`,
+                  width: 200,
+                }}>
+                <AutoEmbedMenu
+                  options={options}
+                  selectedItemIndex={selectedIndex}
+                  onOptionClick={(option: AutoEmbedOption, index: number) => {
+                    setHighlightedIndex(index);
+                    selectOptionAndCleanUp(option);
+                  }}
+                  onOptionMouseEnter={(index: number) => {
+                    setHighlightedIndex(index);
+                  }}
+                />
+              </div>,
+              anchorElementRef.current,
+            )
             : null
         }
       />

@@ -61,9 +61,9 @@ import {
 } from './shortcuts';
 
 export default function ShortcutsPlugin({
-  editor,
-  setIsLinkEditMode,
-}: {
+                                          editor,
+                                          setIsLinkEditMode,
+                                        }: {
   editor: LexicalEditor;
   setIsLinkEditMode: Dispatch<boolean>;
 }): null {

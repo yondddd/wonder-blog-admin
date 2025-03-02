@@ -53,9 +53,9 @@ export const INSERT_INLINE_IMAGE_COMMAND: LexicalCommand<InlineImagePayload> =
   createCommand('INSERT_INLINE_IMAGE_COMMAND');
 
 export function InsertInlineImageDialog({
-  activeEditor,
-  onClose,
-}: {
+                                          activeEditor,
+                                          onClose,
+                                        }: {
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {

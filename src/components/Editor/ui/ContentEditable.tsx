@@ -20,10 +20,10 @@ type Props = {
 };
 
 export default function LexicalContentEditable({
-  className,
-  placeholder,
-  placeholderClassName,
-}: Props): JSX.Element {
+                                                 className,
+                                                 placeholder,
+                                                 placeholderClassName,
+                                               }: Props): JSX.Element {
   return (
     <ContentEditable
       className={className ?? 'ContentEditable__root'}

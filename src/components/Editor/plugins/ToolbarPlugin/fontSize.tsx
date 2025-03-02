@@ -34,10 +34,10 @@ export function parseAllowedFontSize(input: string): string {
 }
 
 export default function FontSize({
-  selectionFontSize,
-  disabled,
-  editor,
-}: {
+                                   selectionFontSize,
+                                   disabled,
+                                   editor,
+                                 }: {
   selectionFontSize: string;
   disabled: boolean;
   editor: LexicalEditor;

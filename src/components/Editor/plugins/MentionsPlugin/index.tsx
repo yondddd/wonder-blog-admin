@@ -53,16 +53,16 @@ const LENGTH_LIMIT = 75;
 
 const AtSignMentionsRegex = new RegExp(
   '(^|\\s|\\()(' +
-    '[' +
-    TRIGGERS +
-    ']' +
-    '((?:' +
-    VALID_CHARS +
-    VALID_JOINS +
-    '){0,' +
-    LENGTH_LIMIT +
-    '})' +
-    ')$',
+  '[' +
+  TRIGGERS +
+  ']' +
+  '((?:' +
+  VALID_CHARS +
+  VALID_JOINS +
+  '){0,' +
+  LENGTH_LIMIT +
+  '})' +
+  ')$',
 );
 
 // 50 is the longest alias length limit.
@@ -71,15 +71,15 @@ const ALIAS_LENGTH_LIMIT = 50;
 // Regex used to match alias.
 const AtSignMentionsRegexAliasRegex = new RegExp(
   '(^|\\s|\\()(' +
-    '[' +
-    TRIGGERS +
-    ']' +
-    '((?:' +
-    VALID_CHARS +
-    '){0,' +
-    ALIAS_LENGTH_LIMIT +
-    '})' +
-    ')$',
+  '[' +
+  TRIGGERS +
+  ']' +
+  '((?:' +
+  VALID_CHARS +
+  '){0,' +
+  ALIAS_LENGTH_LIMIT +
+  '})' +
+  ')$',
 );
 
 // At most, 5 suggestions are shown in the popup.
@@ -574,12 +574,12 @@ class MentionTypeaheadOption extends MenuOption {
 }
 
 function MentionsTypeaheadMenuItem({
-  index,
-  isSelected,
-  onClick,
-  onMouseEnter,
-  option,
-}: {
+                                     index,
+                                     isSelected,
+                                     onClick,
+                                     onMouseEnter,
+                                     option,
+                                   }: {
   index: number;
   isSelected: boolean;
   onClick: () => void;
@@ -670,27 +670,27 @@ export default function NewMentionsPlugin(): JSX.Element | null {
       ) =>
         anchorElementRef.current && results.length
           ? ReactDOM.createPortal(
-              <div className="typeahead-popover mentions-menu">
-                <ul>
-                  {options.map((option, i: number) => (
-                    <MentionsTypeaheadMenuItem
-                      index={i}
-                      isSelected={selectedIndex === i}
-                      onClick={() => {
-                        setHighlightedIndex(i);
-                        selectOptionAndCleanUp(option);
-                      }}
-                      onMouseEnter={() => {
-                        setHighlightedIndex(i);
-                      }}
-                      key={option.key}
-                      option={option}
-                    />
-                  ))}
-                </ul>
-              </div>,
-              anchorElementRef.current,
-            )
+            <div className="typeahead-popover mentions-menu">
+              <ul>
+                {options.map((option, i: number) => (
+                  <MentionsTypeaheadMenuItem
+                    index={i}
+                    isSelected={selectedIndex === i}
+                    onClick={() => {
+                      setHighlightedIndex(i);
+                      selectOptionAndCleanUp(option);
+                    }}
+                    onMouseEnter={() => {
+                      setHighlightedIndex(i);
+                    }}
+                    key={option.key}
+                    option={option}
+                  />
+                ))}
+              </ul>
+            </div>,
+            anchorElementRef.current,
+          )
           : null
       }
     />

@@ -58,3 +58,4 @@ export default function PageBreakPlugin(): JSX.Element | null {
 
   return null;
 }
+

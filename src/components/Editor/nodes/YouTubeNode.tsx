@@ -37,11 +37,11 @@ type YouTubeComponentProps = Readonly<{
 }>;
 
 function YouTubeComponent({
-  className,
-  format,
-  nodeKey,
-  videoID,
-}: YouTubeComponentProps) {
+                            className,
+                            format,
+                            nodeKey,
+                            videoID,
+                          }: YouTubeComponentProps) {
   return (
     <BlockWithAlignableContents
       className={className}

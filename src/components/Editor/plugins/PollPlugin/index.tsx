@@ -36,9 +36,9 @@ export const INSERT_POLL_COMMAND: LexicalCommand<string> = createCommand(
 );
 
 export function InsertPollDialog({
-  activeEditor,
-  onClose,
-}: {
+                                   activeEditor,
+                                   onClose,
+                                 }: {
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {

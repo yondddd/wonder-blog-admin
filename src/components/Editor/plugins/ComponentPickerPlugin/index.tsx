@@ -80,12 +80,12 @@ class ComponentPickerOption extends MenuOption {
 }
 
 function ComponentPickerMenuItem({
-  index,
-  isSelected,
-  onClick,
-  onMouseEnter,
-  option,
-}: {
+                                   index,
+                                   isSelected,
+                                   onClick,
+                                   onMouseEnter,
+                                   option,
+                                 }: {
   index: number;
   isSelected: boolean;
   onClick: () => void;
@@ -373,27 +373,27 @@ export default function ComponentPickerMenuPlugin(): JSX.Element {
         ) =>
           anchorElementRef.current && options.length
             ? ReactDOM.createPortal(
-                <div className="typeahead-popover component-picker-menu">
-                  <ul>
-                    {options.map((option, i: number) => (
-                      <ComponentPickerMenuItem
-                        index={i}
-                        isSelected={selectedIndex === i}
-                        onClick={() => {
-                          setHighlightedIndex(i);
-                          selectOptionAndCleanUp(option);
-                        }}
-                        onMouseEnter={() => {
-                          setHighlightedIndex(i);
-                        }}
-                        key={option.key}
-                        option={option}
-                      />
-                    ))}
-                  </ul>
-                </div>,
-                anchorElementRef.current,
-              )
+              <div className="typeahead-popover component-picker-menu">
+                <ul>
+                  {options.map((option, i: number) => (
+                    <ComponentPickerMenuItem
+                      index={i}
+                      isSelected={selectedIndex === i}
+                      onClick={() => {
+                        setHighlightedIndex(i);
+                        selectOptionAndCleanUp(option);
+                      }}
+                      onMouseEnter={() => {
+                        setHighlightedIndex(i);
+                      }}
+                      key={option.key}
+                      option={option}
+                    />
+                  ))}
+                </ul>
+              </div>,
+              anchorElementRef.current,
+            )
             : null
         }
       />

@@ -75,10 +75,10 @@ export const INSERT_INLINE_COMMAND: LexicalCommand<void> = createCommand(
 );
 
 function AddCommentBox({
-  anchorKey,
-  editor,
-  onAddComment,
-}: {
+                         anchorKey,
+                         editor,
+                         onAddComment,
+                       }: {
   anchorKey: NodeKey;
   editor: LexicalEditor;
   onAddComment: () => void;
@@ -122,8 +122,8 @@ function AddCommentBox({
 }
 
 function EscapeHandlerPlugin({
-  onEscape,
-}: {
+                               onEscape,
+                             }: {
   onEscape: (e: KeyboardEvent) => boolean;
 }): null {
   const [editor] = useLexicalComposerContext();
@@ -142,13 +142,13 @@ function EscapeHandlerPlugin({
 }
 
 function PlainTextEditor({
-  className,
-  autoFocus,
-  onEscape,
-  onChange,
-  editorRef,
-  placeholder = 'Type a comment...',
-}: {
+                           className,
+                           autoFocus,
+                           onEscape,
+                           onChange,
+                           editorRef,
+                           placeholder = 'Type a comment...',
+                         }: {
   autoFocus?: boolean;
   className?: string;
   editorRef?: {current: null | LexicalEditor};
@@ -201,10 +201,10 @@ function useOnChange(
 }
 
 function CommentInputBox({
-  editor,
-  cancelAddComment,
-  submitAddComment,
-}: {
+                           editor,
+                           cancelAddComment,
+                           submitAddComment,
+                         }: {
   cancelAddComment: () => void;
   editor: LexicalEditor;
   submitAddComment: (
@@ -363,10 +363,10 @@ function CommentInputBox({
 }
 
 function CommentsComposer({
-  submitAddComment,
-  thread,
-  placeholder,
-}: {
+                            submitAddComment,
+                            thread,
+                            placeholder,
+                          }: {
   placeholder?: string;
   submitAddComment: (
     commentOrThread: Comment,
@@ -416,11 +416,11 @@ function CommentsComposer({
 }
 
 function ShowDeleteCommentOrThreadDialog({
-  commentOrThread,
-  deleteCommentOrThread,
-  onClose,
-  thread = undefined,
-}: {
+                                           commentOrThread,
+                                           deleteCommentOrThread,
+                                           onClose,
+                                           thread = undefined,
+                                         }: {
   commentOrThread: Comment | Thread;
 
   deleteCommentOrThread: (
@@ -454,11 +454,11 @@ function ShowDeleteCommentOrThreadDialog({
 }
 
 function CommentsPanelListComment({
-  comment,
-  deleteComment,
-  thread,
-  rtf,
-}: {
+                                    comment,
+                                    deleteComment,
+                                    thread,
+                                    rtf,
+                                  }: {
   comment: Comment;
   deleteComment: (
     commentOrThread: Comment | Thread,
@@ -514,13 +514,13 @@ function CommentsPanelListComment({
 }
 
 function CommentsPanelList({
-  activeIDs,
-  comments,
-  deleteCommentOrThread,
-  listRef,
-  submitAddComment,
-  markNodeMap,
-}: {
+                             activeIDs,
+                             comments,
+                             deleteCommentOrThread,
+                             listRef,
+                             submitAddComment,
+                             markNodeMap,
+                           }: {
   activeIDs: Array<string>;
   comments: Comments;
   deleteCommentOrThread: (
@@ -657,12 +657,12 @@ function CommentsPanelList({
 }
 
 function CommentsPanel({
-  activeIDs,
-  deleteCommentOrThread,
-  comments,
-  submitAddComment,
-  markNodeMap,
-}: {
+                         activeIDs,
+                         deleteCommentOrThread,
+                         comments,
+                         submitAddComment,
+                         markNodeMap,
+                       }: {
   activeIDs: Array<string>;
   comments: Comments;
   deleteCommentOrThread: (
@@ -705,8 +705,8 @@ function useCollabAuthorName(): string {
 }
 
 export default function CommentPlugin({
-  providerFactory,
-}: {
+                                        providerFactory,
+                                      }: {
   providerFactory?: (id: string, yjsDocMap: Map<string, Doc>) => Provider;
 }): JSX.Element {
   const collabContext = useCollaborationContext();

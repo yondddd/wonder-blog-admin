@@ -83,11 +83,6 @@ export class CollapsibleTitleNode extends ElementNode {
     return $createCollapsibleTitleNode().updateFromJSON(serializedNode);
   }
 
-  collapseAtStart(_selection: RangeSelection): boolean {
-    this.getParentOrThrow().insertBefore(this);
-    return true;
-  }
-
   static transform(): (node: LexicalNode) => void {
     return (node: LexicalNode) => {
       invariant(
@@ -142,3 +137,4 @@ export function $isCollapsibleTitleNode(
 ): node is CollapsibleTitleNode {
   return node instanceof CollapsibleTitleNode;
 }
+

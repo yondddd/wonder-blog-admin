@@ -40,12 +40,12 @@ function getTotalVotes(options: Options): number {
 }
 
 function PollOptionComponent({
-  option,
-  index,
-  options,
-  totalVotes,
-  withPollNode,
-}: {
+                               option,
+                               index,
+                               options,
+                               totalVotes,
+                               withPollNode,
+                             }: {
   index: number;
   option: Option;
   options: Options;
@@ -130,10 +130,10 @@ function PollOptionComponent({
 }
 
 export default function PollComponent({
-  question,
-  options,
-  nodeKey,
-}: {
+                                        question,
+                                        options,
+                                        nodeKey,
+                                      }: {
   nodeKey: NodeKey;
   options: Options;
   question: string;
@@ -248,3 +248,4 @@ export default function PollComponent({
     </div>
   );
 }
+

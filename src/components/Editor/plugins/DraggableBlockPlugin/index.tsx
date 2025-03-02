@@ -19,8 +19,8 @@ function isOnMenu(element: HTMLElement): boolean {
 }
 
 export default function DraggableBlockPlugin({
-  anchorElem = document.body,
-}: {
+                                               anchorElem = document.body,
+                                             }: {
   anchorElem?: HTMLElement;
 }): JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);

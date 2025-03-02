@@ -129,13 +129,13 @@ type TableCellActionMenuProps = Readonly<{
 }>;
 
 function TableActionMenu({
-  onClose,
-  tableCellNode: _tableCellNode,
-  setIsMenuOpen,
-  contextRef,
-  cellMerge,
-  showColorPickerModal,
-}: TableCellActionMenuProps) {
+                           onClose,
+                           tableCellNode: _tableCellNode,
+                           setIsMenuOpen,
+                           contextRef,
+                           cellMerge,
+                           showColorPickerModal,
+                         }: TableCellActionMenuProps) {
   const [editor] = useLexicalComposerContext();
   const dropDownRef = useRef<HTMLDivElement | null>(null);
   const [tableCellNode, updateTableCellNode] = useState(_tableCellNode);
@@ -212,9 +212,9 @@ function TableActionMenu({
       let topPosition = menuButtonRect.top;
       if (topPosition + dropDownElementRect.height > window.innerHeight) {
         const position = menuButtonRect.bottom - dropDownElementRect.height;
-        topPosition = (position < 0 ? margin : position) + window.pageYOffset;
+        topPosition = position < 0 ? margin : position;
       }
-      dropDownElement.style.top = `${topPosition + +window.pageYOffset}px`;
+      dropDownElement.style.top = `${topPosition}px`;
     }
   }, [contextRef, dropDownRef, editor]);
 
@@ -516,6 +516,19 @@ function TableActionMenu({
     });
   }, [editor, tableCellNode, clearTableSelection, onClose]);
 
+  const toggleFirstRowFreeze = useCallback(() => {
+    editor.update(() => {
+      if (tableCellNode.isAttached()) {
+        const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode);
+        if (tableNode) {
+          tableNode.setFrozenRows(tableNode.getFrozenRows() === 0 ? 1 : 0);
+        }
+      }
+      clearTableSelection();
+      onClose();
+    });
+  }, [editor, tableCellNode, clearTableSelection, onClose]);
+
   const toggleFirstColumnFreeze = useCallback(() => {
     editor.update(() => {
       if (tableCellNode.isAttached()) {
@@ -673,6 +686,13 @@ function TableActionMenu({
       <button
         type="button"
         className="item"
+        onClick={() => toggleFirstRowFreeze()}
+        data-test-id="table-freeze-first-row">
+        <span className="text">Toggle First Row Freeze</span>
+      </button>
+      <button
+        type="button"
+        className="item"
         onClick={() => toggleFirstColumnFreeze()}
         data-test-id="table-freeze-first-column">
         <span className="text">Toggle First Column Freeze</span>
@@ -781,9 +801,9 @@ function TableActionMenu({
 }
 
 function TableCellActionMenuContainer({
-  anchorElem,
-  cellMerge,
-}: {
+                                        anchorElem,
+                                        cellMerge,
+                                      }: {
   anchorElem: HTMLElement;
   cellMerge: boolean;
 }): JSX.Element {
@@ -979,9 +999,9 @@ function TableCellActionMenuContainer({
 }
 
 export default function TableActionMenuPlugin({
-  anchorElem = document.body,
-  cellMerge = false,
-}: {
+                                                anchorElem = document.body,
+                                                cellMerge = false,
+                                              }: {
   anchorElem?: HTMLElement;
   cellMerge?: boolean;
 }): null | ReactPortal {

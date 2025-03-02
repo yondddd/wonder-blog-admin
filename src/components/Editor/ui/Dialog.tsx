@@ -23,9 +23,9 @@ export function DialogButtonsList({children}: Props): JSX.Element {
 }
 
 export function DialogActions({
-  'data-test-id': dataTestId,
-  children,
-}: Props): JSX.Element {
+                                'data-test-id': dataTestId,
+                                children,
+                              }: Props): JSX.Element {
   return (
     <div className="DialogActions" data-test-id={dataTestId}>
       {children}

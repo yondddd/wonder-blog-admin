@@ -93,6 +93,8 @@ const theme: EditorThemeClasses = {
   specialText: 'PlaygroundEditorTheme__specialText',
   tab: 'PlaygroundEditorTheme__tabNode',
   table: 'PlaygroundEditorTheme__table',
+  tableAddColumns: 'PlaygroundEditorTheme__tableAddColumns',
+  tableAddRows: 'PlaygroundEditorTheme__tableAddRows',
   tableAlignment: {
     center: 'PlaygroundEditorTheme__tableAlignmentCenter',
     right: 'PlaygroundEditorTheme__tableAlignmentRight',
@@ -105,6 +107,7 @@ const theme: EditorThemeClasses = {
   tableCellResizer: 'PlaygroundEditorTheme__tableCellResizer',
   tableCellSelected: 'PlaygroundEditorTheme__tableCellSelected',
   tableFrozenColumn: 'PlaygroundEditorTheme__tableFrozenColumn',
+  tableFrozenRow: 'PlaygroundEditorTheme__tableFrozenRow',
   tableRowStriping: 'PlaygroundEditorTheme__tableRowStriping',
   tableScrollableWrapper: 'PlaygroundEditorTheme__tableScrollableWrapper',
   tableSelected: 'PlaygroundEditorTheme__tableSelected',

@@ -147,13 +147,11 @@ export class EquationNode extends DecoratorNode<JSX.Element> {
 
   decorate(): JSX.Element {
     return (
-      <Suspense fallback={null}>
-        <EquationComponent
-          equation={this.__equation}
-          inline={this.__inline}
-          nodeKey={this.__key}
-        />
-      </Suspense>
+      <EquationComponent
+        equation={this.__equation}
+        inline={this.__inline}
+        nodeKey={this.__key}
+      />
     );
   }
 }

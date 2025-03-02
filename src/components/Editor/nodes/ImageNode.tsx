@@ -221,35 +221,33 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   decorate(): JSX.Element {
     return (
-      <Suspense fallback={null}>
-        <ImageComponent
-          src={this.__src}
-          altText={this.__altText}
-          width={this.__width}
-          height={this.__height}
-          maxWidth={this.__maxWidth}
-          nodeKey={this.getKey()}
-          showCaption={this.__showCaption}
-          caption={this.__caption}
-          captionsEnabled={this.__captionsEnabled}
-          resizable={true}
-        />
-      </Suspense>
+      <ImageComponent
+        src={this.__src}
+        altText={this.__altText}
+        width={this.__width}
+        height={this.__height}
+        maxWidth={this.__maxWidth}
+        nodeKey={this.getKey()}
+        showCaption={this.__showCaption}
+        caption={this.__caption}
+        captionsEnabled={this.__captionsEnabled}
+        resizable={true}
+      />
     );
   }
 }
 
 export function $createImageNode({
-  altText,
-  height,
-  maxWidth = 500,
-  captionsEnabled,
-  src,
-  width,
-  showCaption,
-  caption,
-  key,
-}: ImagePayload): ImageNode {
+                                   altText,
+                                   height,
+                                   maxWidth = 500,
+                                   captionsEnabled,
+                                   src,
+                                   width,
+                                   showCaption,
+                                   caption,
+                                   key,
+                                 }: ImagePayload): ImageNode {
   return $applyNodeReplacement(
     new ImageNode(
       src,

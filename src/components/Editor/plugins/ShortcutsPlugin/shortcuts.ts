@@ -8,7 +8,7 @@
 
 import {IS_APPLE} from '@/components/Editor/shared/src/environment';
 
-//disable eslint sorting rule for quick reference to shortcuts
+///disable eslint sorting rule for quick reference to shortcuts
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 export const SHORTCUTS = Object.freeze({
   // (Ctrl|⌘) + (Alt|Option) + <key> shortcuts

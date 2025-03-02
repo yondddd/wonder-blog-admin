@@ -184,11 +184,11 @@ function dropDownActiveClass(active: boolean) {
 }
 
 function BlockFormatDropDown({
-  editor,
-  blockType,
-  rootType,
-  disabled = false,
-}: {
+                               editor,
+                               blockType,
+                               rootType,
+                               disabled = false,
+                             }: {
   blockType: keyof typeof blockTypeToBlockName;
   rootType: keyof typeof rootTypeToRootName;
   editor: LexicalEditor;
@@ -293,11 +293,11 @@ function Divider(): JSX.Element {
 }
 
 function FontDropDown({
-  editor,
-  value,
-  style,
-  disabled = false,
-}: {
+                        editor,
+                        value,
+                        style,
+                        disabled = false,
+                      }: {
   editor: LexicalEditor;
   value: string;
   style: string;
@@ -348,11 +348,11 @@ function FontDropDown({
 }
 
 function ElementFormatDropdown({
-  editor,
-  value,
-  isRTL,
-  disabled = false,
-}: {
+                                 editor,
+                                 value,
+                                 isRTL,
+                                 disabled = false,
+                               }: {
   editor: LexicalEditor;
   value: ElementFormatType;
   isRTL: boolean;
@@ -469,11 +469,11 @@ function ElementFormatDropdown({
 }
 
 export default function ToolbarPlugin({
-  editor,
-  activeEditor,
-  setActiveEditor,
-  setIsLinkEditMode,
-}: {
+                                        editor,
+                                        activeEditor,
+                                        setActiveEditor,
+                                        setIsLinkEditMode,
+                                      }: {
   editor: LexicalEditor;
   activeEditor: LexicalEditor;
   setActiveEditor: Dispatch<LexicalEditor>;
@@ -506,9 +506,9 @@ export default function ToolbarPlugin({
         anchorNode.getKey() === 'root'
           ? anchorNode
           : $findMatchingParent(anchorNode, (e) => {
-              const parent = e.getParent();
-              return parent !== null && $isRootOrShadowRoot(parent);
-            });
+            const parent = e.getParent();
+            return parent !== null && $isRootOrShadowRoot(parent);
+          });
 
       if (element === null) {
         element = anchorNode.getTopLevelElementOrThrow();
@@ -597,8 +597,8 @@ export default function ToolbarPlugin({
         $isElementNode(matchingParent)
           ? matchingParent.getFormatType()
           : $isElementNode(node)
-          ? node.getFormatType()
-          : parent?.getFormatType() || 'left',
+            ? node.getFormatType()
+            : parent?.getFormatType() || 'left',
       );
     }
     if ($isRangeSelection(selection) || $isTableSelection(selection)) {

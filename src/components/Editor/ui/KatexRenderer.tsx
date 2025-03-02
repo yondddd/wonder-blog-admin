@@ -13,10 +13,10 @@ import * as React from 'react';
 import {useEffect, useRef} from 'react';
 
 export default function KatexRenderer({
-  equation,
-  inline,
-  onDoubleClick,
-}: Readonly<{
+                                        equation,
+                                        inline,
+                                        onDoubleClick,
+                                      }: Readonly<{
   equation: string;
   inline: boolean;
   onDoubleClick: () => void;
@@ -54,3 +54,4 @@ export default function KatexRenderer({
     </>
   );
 }
+

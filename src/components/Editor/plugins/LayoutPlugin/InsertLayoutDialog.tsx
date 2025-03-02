@@ -25,9 +25,9 @@ const LAYOUTS = [
 ];
 
 export default function InsertLayoutDialog({
-  activeEditor,
-  onClose,
-}: {
+                                             activeEditor,
+                                             onClose,
+                                           }: {
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {

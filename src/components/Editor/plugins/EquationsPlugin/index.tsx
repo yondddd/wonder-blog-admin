@@ -36,9 +36,9 @@ export const INSERT_EQUATION_COMMAND: LexicalCommand<CommandPayload> =
   createCommand('INSERT_EQUATION_COMMAND');
 
 export function InsertEquationDialog({
-  activeEditor,
-  onClose,
-}: {
+                                       activeEditor,
+                                       onClose,
+                                     }: {
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {

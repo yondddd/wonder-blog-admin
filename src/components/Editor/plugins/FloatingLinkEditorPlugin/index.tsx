@@ -46,13 +46,13 @@ function preventDefault(
 }
 
 function FloatingLinkEditor({
-  editor,
-  isLink,
-  setIsLink,
-  anchorElem,
-  isLinkEditMode,
-  setIsLinkEditMode,
-}: {
+                              editor,
+                              isLink,
+                              setIsLink,
+                              anchorElem,
+                              isLinkEditMode,
+                              setIsLinkEditMode,
+                            }: {
   editor: LexicalEditor;
   isLink: boolean;
   setIsLink: Dispatch<boolean>;
@@ -392,10 +392,10 @@ function useFloatingLinkEditorToolbar(
 }
 
 export default function FloatingLinkEditorPlugin({
-  anchorElem = document.body,
-  isLinkEditMode,
-  setIsLinkEditMode,
-}: {
+                                                   anchorElem = document.body,
+                                                   isLinkEditMode,
+                                                   setIsLinkEditMode,
+                                                 }: {
   anchorElem?: HTMLElement;
   isLinkEditMode: boolean;
   setIsLinkEditMode: Dispatch<boolean>;

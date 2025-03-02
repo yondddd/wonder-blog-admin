@@ -158,9 +158,7 @@ export const updateFontSize = (
 export const formatParagraph = (editor: LexicalEditor) => {
   editor.update(() => {
     const selection = $getSelection();
-    if ($isRangeSelection(selection)) {
-      $setBlocksType(selection, () => $createParagraphNode());
-    }
+    $setBlocksType(selection, () => $createParagraphNode());
   });
 };
 
@@ -217,18 +215,18 @@ export const formatCode = (editor: LexicalEditor, blockType: string) => {
   if (blockType !== 'code') {
     editor.update(() => {
       let selection = $getSelection();
-
-      if (selection !== null) {
-        if (selection.isCollapsed()) {
-          $setBlocksType(selection, () => $createCodeNode());
-        } else {
-          const textContent = selection.getTextContent();
-          const codeNode = $createCodeNode();
-          selection.insertNodes([codeNode]);
-          selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            selection.insertRawText(textContent);
-          }
+      if (!selection) {
+        return;
+      }
+      if (!$isRangeSelection(selection) || selection.isCollapsed()) {
+        $setBlocksType(selection, () => $createCodeNode());
+      } else {
+        const textContent = selection.getTextContent();
+        const codeNode = $createCodeNode();
+        selection.insertNodes([codeNode]);
+        selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          selection.insertRawText(textContent);
         }
       }
     });
@@ -267,7 +265,7 @@ export const clearFormatting = (editor: LexicalEditor) => {
            *
            * The cleared text is based on the length of the selected text.
            */
-          // We need this in case the selected text only has one format
+            // We need this in case the selected text only has one format
           const extractedTextNode = extractedNodes[0];
           if (nodes.length === 1 && $isTextNode(extractedTextNode)) {
             textNode = extractedTextNode;

@@ -35,10 +35,10 @@ type EquationComponentProps = {
 };
 
 export default function EquationComponent({
-  equation,
-  inline,
-  nodeKey,
-}: EquationComponentProps): JSX.Element {
+                                            equation,
+                                            inline,
+                                            nodeKey,
+                                          }: EquationComponentProps): JSX.Element {
   const [editor] = useLexicalComposerContext();
   const isEditable = useLexicalEditable();
   const [equationValue, setEquationValue] = useState(equation);

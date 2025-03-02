@@ -61,14 +61,14 @@ function useSuspenseImage(src: string) {
 }
 
 function LazyImage({
-  altText,
-  className,
-  imageRef,
-  src,
-  width,
-  height,
-  position,
-}: {
+                     altText,
+                     className,
+                     imageRef,
+                     src,
+                     width,
+                     height,
+                     position,
+                   }: {
   altText: string;
   className: string | null;
   height: 'inherit' | number;
@@ -96,10 +96,10 @@ function LazyImage({
 }
 
 export function UpdateInlineImageDialog({
-  activeEditor,
-  nodeKey,
-  onClose,
-}: {
+                                          activeEditor,
+                                          nodeKey,
+                                          onClose,
+                                        }: {
   activeEditor: LexicalEditor;
   nodeKey: NodeKey;
   onClose: () => void;
@@ -176,15 +176,15 @@ export function UpdateInlineImageDialog({
 }
 
 export default function InlineImageComponent({
-  src,
-  altText,
-  nodeKey,
-  width,
-  height,
-  showCaption,
-  caption,
-  position,
-}: {
+                                               src,
+                                               altText,
+                                               nodeKey,
+                                               width,
+                                               height,
+                                               showCaption,
+                                               caption,
+                                               position,
+                                             }: {
   altText: string;
   caption: LexicalEditor;
   height: 'inherit' | number;

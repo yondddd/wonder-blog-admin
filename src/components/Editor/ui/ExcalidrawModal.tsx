@@ -79,15 +79,15 @@ export const useCallbackRefState = () => {
  * which can be used to export an editable image
  */
 export default function ExcalidrawModal({
-  closeOnClickOutside = false,
-  onSave,
-  initialElements,
-  initialAppState,
-  initialFiles,
-  isShown = false,
-  onDelete,
-  onClose,
-}: Props): ReactPortal | null {
+                                          closeOnClickOutside = false,
+                                          onSave,
+                                          initialElements,
+                                          initialAppState,
+                                          initialFiles,
+                                          isShown = false,
+                                          onDelete,
+                                          onClose,
+                                        }: Props): ReactPortal | null {
   const excaliDrawModelRef = useRef<HTMLDivElement | null>(null);
   const [excalidrawAPI, excalidrawAPIRefCallback] = useCallbackRefState();
   const [discardModalOpen, setDiscardModalOpen] = useState(false);
