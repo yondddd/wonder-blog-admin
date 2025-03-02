@@ -143,10 +143,9 @@ function Editor({
     }
   };
 
-  const floatingAnchorElementPlugins = React.useMemo(() => {
-    if (!floatingAnchorElem) return null;
-
-    return (
+  let floatingAnchorElementPlugins = null;
+  if (floatingAnchorElem) {
+    floatingAnchorElementPlugins = (
       <>
         <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
         <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
@@ -159,7 +158,7 @@ function Editor({
         <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
       </>
     );
-  }, [floatingAnchorElem, isLinkEditMode]);
+  }
 
   return (
     <>
@@ -262,7 +261,6 @@ function Editor({
     </>
   );
 }
-
 // 修改后的EditorWrapper组件
 function EditorWrapper({
   initialContent,
@@ -335,19 +333,14 @@ function EditorWrapper({
     }
   }, [initialContent, editor]);
 
-  // 使用 useMemo 优化渲染
-  const editorComponent = React.useMemo(() => (
-    <Editor debug={debug} showTableOfContent={showTableOfContent}>
-      {children}
-    </Editor>
-  ), [debug, showTableOfContent, children]);
-
   return (
     <SharedHistoryContext>
       <TableContext>
         <ToolbarContext>
           <div className="editor-shell">
-            {editorComponent}
+            <Editor debug={debug} showTableOfContent={showTableOfContent}>
+              {children}
+            </Editor>
           </div>
           <Settings />
         </ToolbarContext>
@@ -364,8 +357,7 @@ function App({
   readOnly,
   children,
 }: AppProps) {
-  // 使用 useMemo 缓存编辑器配置，避免不必要的重新计算
-  const editorConfig = React.useMemo(() => ({
+  const editorConfig = {
     namespace: 'Playground',
     nodes: [...PlaygroundNodes],
     onError: (error: Error) => {
@@ -383,11 +375,8 @@ function App({
           }
         }
       : undefined,
-  }), [initialContent, readOnly]);
+  };
 
-  // 使用 key 属性确保在 initialContent 变化时重新创建编辑器实例
-  // 但这可能会导致性能问题，如果频繁变化的话
-  // 考虑是否真的需要这个 key
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <EditorWrapper
@@ -402,8 +391,7 @@ function App({
   );
 }
 
-// 使用 React.memo 包装 LexicalEditor 组件，避免不必要的重新渲染
-export default React.memo(function LexicalEditor({
+export default function LexicalEditor({
   initialContent,
   debug = false,
   showTableOfContent = false,
@@ -411,17 +399,17 @@ export default React.memo(function LexicalEditor({
   children,
 }: LexicalEditorProps): JSX.Element {
   return (
-    <SettingsContext>
-      <FlashMessageContext>
-        <App
-          initialContent={initialContent}
-          debug={debug}
-          showTableOfContent={showTableOfContent}
-          readOnly={readOnly}
-        >
-          {children}
-        </App>
-      </FlashMessageContext>
-    </SettingsContext>
+      <SettingsContext>
+        <FlashMessageContext>
+          <App
+            initialContent={initialContent}
+            debug={debug}
+            showTableOfContent={showTableOfContent}
+            readOnly={readOnly}
+          >
+            {children}
+          </App>
+        </FlashMessageContext>
+      </SettingsContext>
   );
-});
+}

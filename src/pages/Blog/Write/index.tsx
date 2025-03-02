@@ -206,8 +206,8 @@ const BlogWrite: React.FC = () => {
 
   return (
     <PageContainer title={initialValues.id ? '编辑文章' : '新建文章'}>
-      <Form form={form} layout="vertical">
-        <div className="max-w-4xl mx-auto" style={{ background: 'rgb(238, 239, 233)' }}>
+      <Form form={form} >
+        <div  style={{ background: 'rgb(238, 239, 233)' }}>
           {/* Metadata Section */}
           <Card style={{ background: 'rgb(238, 239, 233)' }}>
             <Row gutter={16}>
@@ -281,22 +281,26 @@ const BlogWrite: React.FC = () => {
 
           {/* Content Section */}
           <div>
-            <Title level={5}>文章摘要</Title>
-            <Form.Item name="description" hidden>
-              <Input />
-            </Form.Item>
-            <LexicalEditor initialContent={descriptionRef.current}>
-              <EditorContentGetter editorRef={descriptionEditorRef} />
-            </LexicalEditor>
-          </div>
-          <div className="mt-4">
-            <Title level={5}>文章正文</Title>
-            <Form.Item name="content" hidden>
-              <Input />
-            </Form.Item>
-            <LexicalEditor initialContent={contentRef.current}>
-              <EditorContentGetter editorRef={contentEditorRef} />
-            </LexicalEditor>
+            <div>
+              <Title level={5}>文章摘要</Title>
+              <Form.Item name="description" hidden>
+                <Input />
+              </Form.Item>
+                <LexicalEditor initialContent={descriptionRef.current}>
+                  <EditorContentGetter editorRef={descriptionEditorRef} />
+                </LexicalEditor>
+            </div>
+
+            <div >
+              <Title level={5}>文章正文</Title>
+              <Form.Item name="content" hidden>
+                <Input />
+              </Form.Item>
+
+                <LexicalEditor initialContent={contentRef.current}>
+                  <EditorContentGetter editorRef={contentEditorRef} />
+                </LexicalEditor>
+            </div>
           </div>
         </div>
       </Form>
