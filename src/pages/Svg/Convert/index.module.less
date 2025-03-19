@@ -1,0 +1,153 @@
+.pageContainer {
+  :global(.ant-pro-page-container-children-content) {
+    margin: 24px;
+  }
+}
+
+.uploadCard,
+.convertCard {
+  height: 100%;
+  background: #fafafa;
+  border-radius: 8px;
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.03),
+    0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px 0 rgba(0, 0, 0, 0.02);
+
+  :global(.ant-card-head) {
+    background: transparent;
+    border-bottom: 1px solid #f0f0f0;
+
+    :global(.ant-card-head-title) {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+}
+
+.dragger {
+  margin-bottom: 24px;
+
+  :global {
+    .ant-upload-drag {
+      background: white;
+      border: 2px dashed #d9d9d9;
+      border-radius: 8px;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #1890ff;
+      }
+    }
+
+    .ant-upload-text {
+      margin: 8px 0;
+      color: #666;
+    }
+
+    .ant-upload-hint {
+      color: #999;
+    }
+
+    .ant-upload-drag-icon {
+      color: #40a9ff;
+      font-size: 48px;
+    }
+  }
+}
+
+.previewContainer {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  border-radius: 8px;
+  min-height: 400px;
+  padding: 24px;
+  border: 1px solid #f0f0f0;
+
+  img {
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+  }
+}
+
+.fullScreenPreview {
+  position: relative;
+  height: calc(100vh - 200px);
+  background: #fafafa;
+  border-radius: 8px;
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.03),
+    0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px 0 rgba(0, 0, 0, 0.02);
+}
+
+.fullScreenControls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.fullScreenImage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 24px;
+
+  img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+  }
+}
+
+.emptyPreview {
+  margin: 32px 0;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+}
+
+.convertForm {
+  padding: 16px 0;
+}
+
+.formItem {
+  margin-bottom: 24px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #1f1f1f;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+    margin-top: 32px;
+  }
+}
