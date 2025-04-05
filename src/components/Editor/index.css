@@ -8,47 +8,6 @@
 
 @import 'https://fonts.googleapis.com/css?family=Reenie+Beanie';
 
-body {
-  margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    '.SFNSText-Regular',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #eee;
-  padding: 0 20px;
-}
-
-header {
-  max-width: 580px;
-  margin: auto;
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-
-header a {
-  max-width: 220px;
-  margin: 20px 0 0 0;
-  display: block;
-}
-
-header img {
-  display: block;
-  height: 100%;
-  width: 100%;
-}
-
-header h1 {
-  text-align: left;
-  color: #333;
-  display: inline-block;
-  margin: 20px 0 0 0;
-}
-
 .editor-shell {
   margin: 20px auto;
   border-radius: 2px;
@@ -267,7 +226,9 @@ pre::-webkit-scrollbar-thumb {
   background: #fff !important;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3) !important;
   border-radius: 8px !important;
-  position: fixed !important;
+  position: absolute !important;
+  transform: translateY(-8px) !important;
+  z-index: 10 !important;
 }
 
 .typeahead-popover ul {
@@ -275,7 +236,7 @@ pre::-webkit-scrollbar-thumb {
   list-style: none !important;
   margin: 0 !important;
   border-radius: 8px !important;
-  max-height: 200px !important;
+  max-height: 350px !important;
   overflow-y: scroll !important;
 }
 

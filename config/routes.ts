@@ -56,12 +56,12 @@ export default [
       },
     ],
   },
-  {
-    path: '/svg',
-    name: 'svg',
-    icon: 'smile',
-    component: './Svg/Convert',
-  },
+  // {
+  //   path: '/svg',
+  //   name: 'svg',
+  //   icon: 'smile',
+  //   component: './Svg/Convert',
+  // },
   {
     path: '/',
     redirect: '/welcome',

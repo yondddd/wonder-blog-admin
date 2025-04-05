@@ -16,6 +16,8 @@ import {
   Switch,
   Space,
   Divider,
+  Tooltip,
+  Tabs,
 } from 'antd';
 import { history } from '@umijs/max';
 import LexicalEditor from '@/components/Editor';
@@ -24,7 +26,18 @@ import { listAllCategory } from '@/services/ant-design-pro/categoryApi';
 import { listAllTag } from '@/services/ant-design-pro/tagApi';
 import type { BlogItem, CategoryListItem, TagListItem } from '@/services/ant-design-pro/types';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { EyeOutlined, EyeInvisibleOutlined, LockOutlined, FileImageOutlined, ReadOutlined, FieldTimeOutlined, EyeInvisibleFilled } from '@ant-design/icons';
+import {
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  LockOutlined,
+  FileImageOutlined,
+  ReadOutlined,
+  FieldTimeOutlined,
+  SaveOutlined,
+  EditOutlined,
+  TagOutlined,
+  EyeInvisibleFilled
+} from '@ant-design/icons';
 
 // 创建一个编辑器内容获取组件
 const EditorContentGetter = ({
@@ -203,50 +216,46 @@ const BlogWrite: React.FC = () => {
     <PageContainer title={initialValues.id ? '编辑文章' : '新建文章'}>
       <Form form={form} layout="vertical">
         <div style={{ background: 'rgb(238, 239, 233)', padding: '16px', borderRadius: '8px' }}>
-          {/* 文章基本信息 */}
-          <Card
-            style={{
-              background: 'rgb(238, 239, 233)',
-              marginBottom: '16px',
-              border: 'none',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-            }}
-          >
-            <Row gutter={24}>
-              <Col span={8}>
+          {/* 文章基本信息 - 使用精简的卡片布局 */}
+          <Card style={{ marginBottom: '16px', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              {/* 第一行：标题和首图 */}
+              <div style={{ flex: '3 0 300px' }}>
                 <Form.Item
                   label="文章标题"
                   name="title"
                   rules={[{ required: true, message: '请输入文章标题' }]}
+                  style={{ marginBottom: '8px' }}
                 >
                   <Input
                     placeholder="请输入标题"
-                    size="large"
-                    style={{ borderRadius: '6px' }}
+                    size="middle"
+                    style={{ borderRadius: '4px' }}
                   />
                 </Form.Item>
-              </Col>
-              <Col span={16}>
+              </div>
+              <div style={{ flex: '2 0 200px' }}>
                 <Form.Item
                   label="文章首图"
                   name="firstPicture"
                   rules={[{ required: true, message: '请输入图片URL' }]}
+                  style={{ marginBottom: '8px' }}
                 >
                   <Input
                     placeholder="输入图片URL"
                     prefix={<FileImageOutlined />}
-                    style={{ borderRadius: '6px' }}
+                    style={{ borderRadius: '4px' }}
                   />
                 </Form.Item>
-              </Col>
-            </Row>
+              </div>
 
-            <Row gutter={24}>
-              <Col span={8}>
+              {/* 第二行：分类和标签 */}
+              <div style={{ flex: '1 0 200px' }}>
                 <Form.Item
                   label="分类"
                   name="category"
-                  rules={[{ required: true, message: '请选择或创建分类' }]}
+                  rules={[{ required: true, message: '请选择分类' }]}
+                  style={{ marginBottom: '8px' }}
                 >
                   <Select
                     showSearch
@@ -259,15 +268,16 @@ const BlogWrite: React.FC = () => {
                     filterOption={(input, option) =>
                       (option?.label as string).toLowerCase().includes(input.toLowerCase())
                     }
-                    style={{ borderRadius: '6px' }}
+                    style={{ borderRadius: '4px' }}
                   />
                 </Form.Item>
-              </Col>
-              <Col span={16}>
+              </div>
+              <div style={{ flex: '2 0 300px' }}>
                 <Form.Item
                   label="标签"
                   name="tags"
-                  rules={[{ required: true, message: '请选择或创建标签' }]}
+                  rules={[{ required: true, message: '请选择标签' }]}
+                  style={{ marginBottom: '8px' }}
                 >
                   <Select
                     mode="multiple"
@@ -282,65 +292,73 @@ const BlogWrite: React.FC = () => {
                     }
                     showSearch
                     allowClear
-                    style={{ borderRadius: '6px' }}
+                    style={{ borderRadius: '4px' }}
                   />
                 </Form.Item>
-              </Col>
-            </Row>
+              </div>
 
-            <Row gutter={24}>
-              <Col span={8}>
-                <Form.Item
-                  label="字数统计"
-                  name="words"
-                >
-                  <Input
-                    type="number"
-                    prefix={<ReadOutlined />}
-                    style={{ borderRadius: '6px' }}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  label="阅读时长(分钟)"
-                  name="readTime"
-                >
-                  <Input
-                    type="number"
-                    prefix={<FieldTimeOutlined />}
-                    style={{ borderRadius: '6px' }}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  label="浏览次数"
-                  name="views"
-                >
-                  <Input
-                    type="number"
-                    prefix={<EyeOutlined />}
-                    style={{ borderRadius: '6px' }}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+              {/* 第三行：统计信息和摘要 */}
+              <div style={{ flex: '1 0 100%' }}>
+                <Tabs
+                  defaultActiveKey="description"
+                  size="small"
+                  style={{ marginBottom: '-16px' }}
+                  items={[
+                    {
+                      key: 'description',
+                      label: '文章摘要',
+                      children: (
+                        <Form.Item name="description" style={{ marginBottom: '0' }}>
+                          <Input.TextArea
+                            rows={2}
+                            placeholder="请输入文章摘要"
+                            autoSize={{ minRows: 2, maxRows: 3 }}
+                            style={{ borderRadius: '4px', resize: 'none' }}
+                            onChange={handleDescriptionChange}
+                          />
+                        </Form.Item>
+                      )
+                    },
+                    {
+                      key: 'stats',
+                      label: '文章统计',
+                      children: (
+                        <Row gutter={16} style={{ marginBottom: '0' }}>
+                          <Col span={8}>
+                            <Form.Item label="字数统计" name="words" style={{ marginBottom: '0' }}>
+                              <Input
+                                type="number"
+                                prefix={<ReadOutlined />}
+                                style={{ borderRadius: '4px' }}
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={8}>
+                            <Form.Item label="阅读时长(分钟)" name="readTime" style={{ marginBottom: '0' }}>
+                              <Input
+                                type="number"
+                                prefix={<FieldTimeOutlined />}
+                                style={{ borderRadius: '4px' }}
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={8}>
+                            <Form.Item label="浏览次数" name="views" style={{ marginBottom: '0' }}>
+                              <Input
+                                type="number"
+                                prefix={<EyeOutlined />}
+                                style={{ borderRadius: '4px' }}
+                              />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )
+                    }
+                  ]}
+                />
+              </div>
+            </div>
           </Card>
-
-          {/* 文章摘要 */}
-          <div style={{ marginBottom: '24px' }}>
-            <Title level={5} style={{ marginBottom: '12px' }}>文章摘要</Title>
-            <Form.Item name="description">
-              <Input.TextArea
-                rows={4}
-                placeholder="请输入文章摘要"
-                autoSize={{ minRows: 4, maxRows: 8 }}
-                style={{ borderRadius: '6px', resize: 'none' }}
-                onChange={handleDescriptionChange}
-              />
-            </Form.Item>
-          </div>
 
           {/* 文章正文 - 保持不变 */}
           <div>
@@ -349,7 +367,7 @@ const BlogWrite: React.FC = () => {
               <Input />
             </Form.Item>
 
-            <LexicalEditor initialContent={contentRef.current}>
+            <LexicalEditor initialContent={contentRef.current} showTableOfContent={true}>
               <EditorContentGetter editorRef={contentEditorRef} />
             </LexicalEditor>
           </div>
@@ -366,6 +384,7 @@ const BlogWrite: React.FC = () => {
         width={380}
         maskClosable={false}
         bodyStyle={{ padding: '20px' }}
+        title="文章设置"
       >
         <Form
           form={form}
@@ -375,6 +394,7 @@ const BlogWrite: React.FC = () => {
         >
           <Form.Item
             name="visibilityType"
+            label="可见性设置"
             rules={[{ required: true, message: '请选择可见性类型' }]}
             style={{ marginBottom: 0 }}
           >
@@ -435,51 +455,48 @@ const BlogWrite: React.FC = () => {
             }
           </Form.Item>
 
-          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.visibilityType !== curr.visibilityType}>
-            {({ getFieldValue }) =>
-              getFieldValue('visibilityType') !== 2 && (
-                <div style={{ marginBottom: 0 }}>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '8px',
+          <Divider style={{ margin: '0 0 8px' }} />
+          <div style={{ fontWeight: 500, marginBottom: '8px' }}>文章选项</div>
+
+          <div style={{ marginBottom: 0 }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '8px',
+            }}>
+              {[
+                { name: 'appreciation', label: '赞赏功能' },
+                { name: 'recommend', label: '推荐文章' },
+                { name: 'commentEnabled', label: '评论功能' },
+                { name: 'top', label: '置顶文章' }
+              ].map(item => (
+                <div key={item.name} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#f5f5f5',
+                  padding: '6px 10px',
+                  borderRadius: '4px',
+                }}>
+                  <span style={{
+                    color: 'rgba(0, 0, 0, 0.65)',
+                    fontSize: '12px',
                   }}>
-                    {[
-                      { name: 'appreciation', label: '赞赏功能' },
-                      { name: 'recommend', label: '推荐文章' },
-                      { name: 'commentEnabled', label: '评论功能' },
-                      { name: 'top', label: '置顶文章' }
-                    ].map(item => (
-                      <div key={item.name} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        backgroundColor: '#eeefe9',
-                        padding: '6px 10px',
-                        borderRadius: '4px',
-                      }}>
-                        <span style={{
-                          color: 'rgba(0, 0, 0, 0.65)',
-                          fontSize: '12px',
-                        }}>
-                          {item.label}
-                        </span>
-                        <Form.Item name={item.name} valuePropName="checked" style={{ margin: 0 }}>
-                          <Switch size="small" />
-                        </Form.Item>
-                      </div>
-                    ))}
-                  </div>
+                    {item.label}
+                  </span>
+                  <Form.Item name={item.name} valuePropName="checked" style={{ margin: 0 }}>
+                    <Switch size="small" />
+                  </Form.Item>
                 </div>
-              )
-            }
-          </Form.Item>
+              ))}
+            </div>
+          </div>
 
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '8px',
-            marginTop: '4px'
+            marginTop: '12px'
           }}>
             <Button size="small" onClick={() => setVisibilityModalVisible(false)}>取消</Button>
             <Button
@@ -536,28 +553,28 @@ const BlogWrite: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* Floating Save Button */}
-      <Button
-        type="primary"
-        shape="round"
-        style={{
-          position: 'fixed',
-          bottom: 20,
-          right: 20,
-          zIndex: 1000,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          fontSize: '16px',
-        }}
-        onClick={() => setVisibilityModalVisible(true)}
-      >
-        保存
-      </Button>
+      {/* 优化后的保存按钮 */}
+      <Tooltip title="保存文章" placement="left">
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<SaveOutlined />}
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 1000,
+            width: '56px',
+            height: '56px',
+            fontSize: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          }}
+          onClick={() => setVisibilityModalVisible(true)}
+        />
+      </Tooltip>
     </PageContainer>
   );
 };

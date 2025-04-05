@@ -82,8 +82,8 @@ const AtSignMentionsRegexAliasRegex = new RegExp(
   ')$',
 );
 
-// At most, 5 suggestions are shown in the popup.
-const SUGGESTION_LIST_LENGTH_LIMIT = 5;
+// At most, 10 suggestions are shown in the popup.
+const SUGGESTION_LIST_LENGTH_LIMIT = 10;
 
 const mentionsCache = new Map();
 

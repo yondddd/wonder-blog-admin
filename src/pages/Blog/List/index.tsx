@@ -34,10 +34,8 @@ import {
   CloseCircleOutlined
 } from '@ant-design/icons';
 import type {
-  BlogListItem,
   CategoryListItem,
   TagListItem,
-  VisibilityBlogReq,
 } from '@/services/ant-design-pro/types';
 
 import {
@@ -51,6 +49,9 @@ import { listAllCategory } from '@/services/ant-design-pro/categoryApi';
 import { listAllTag } from '@/services/ant-design-pro/tagApi';
 
 // 类型定义
+type BlogListItem = API.BlogListItem;
+type VisibilityBlogReq = API.VisibilityBlogReq;
+
 type BlogVisibilityFormValues = VisibilityBlogReq & {
   radio: 1 | 2 | 3;
 };
@@ -60,9 +61,23 @@ type TableParams = {
   pageSize?: number;
 } & Record<string, any>;
 
+// 常量定义
+const VISIBILITY_OPTIONS = [
+  { value: 1, icon: <EyeOutlined />, label: '公开', color: '#52c41a' },
+  { value: 2, icon: <EyeInvisibleOutlined />, label: '私密', color: '#faad14' },
+  { value: 3, icon: <LockOutlined />, label: '密码保护', color: '#1677ff' }
+];
+
+const BLOG_FEATURE_OPTIONS = [
+  { name: 'appreciation', label: '赞赏功能' },
+  { name: 'recommend', label: '推荐文章' },
+  { name: 'commentEnabled', label: '评论功能' },
+  { name: 'top', label: '置顶文章' }
+];
+
 const BlogList: React.FC = () => {
   const actionRef = useRef<ActionType>();
-  const [form] = Form.useForm<FormInstance>();
+  const [form] = Form.useForm();
   const [selectedRows, setSelectedRows] = useState<BlogListItem[]>([]);
   const [categoryList, setCategoryList] = useState<CategoryListItem[]>([]);
   const [tagList, setTagList] = useState<TagListItem[]>([]);
@@ -323,14 +338,13 @@ const BlogList: React.FC = () => {
           resetText: '重置',
           optionRender: (_, __, dom) => [...dom],
         }}
-        form={form}
-        request={async (params) => {
+        request={async (params, sort, filter) => {
           const { current: pageNo = 1, pageSize = 10, ...rest } = params;
           try {
             const res = await pageBlog({ pageNo, pageSize, ...rest });
             return {
-              data: res.data,
-              total: res.total,
+              data: (res.data || []) as BlogListItem[],
+              total: res.total || 0,
               success: true,
             };
           } catch (error) {
@@ -379,7 +393,7 @@ const BlogList: React.FC = () => {
         }}
       />
 
-      {/* 简化可见性设置模态框 */}
+      {/* 可见性设置模态框 */}
       <Modal
         open={visible}
         onCancel={() => setVisible(false)}
@@ -388,27 +402,43 @@ const BlogList: React.FC = () => {
         centered
         width={380}
         maskClosable={false}
-        bodyStyle={{ padding: '20px' }}
+        bodyStyle={{ padding: '20px 24px' }}
+        title={null}
+        className="visibility-modal"
       >
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '16px'
+        }}>
+          <div style={{
+            fontSize: '16px',
+            fontWeight: 500,
+            color: '#000000d9'
+          }}>
+            文章可见性设置
+          </div>
+        </div>
+
         <Form<BlogVisibilityFormValues>
           form={visibilityForm}
           layout="vertical"
           onFinish={handleVisibilitySubmit}
           requiredMark={false}
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
         >
+          {/* 可见性选项部分 */}
           <Form.Item
             name="radio"
             rules={[{ required: true, message: '请选择可见性类型' }]}
-            style={{ marginBottom: 0 }}
+            style={{ marginBottom: '16px' }}
           >
             <Radio.Group style={{ width: '100%' }}>
-              <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
-                {[
-                  { value: 1, icon: <EyeOutlined />, label: '公开', color: '#52c41a' },
-                  { value: 2, icon: <EyeInvisibleOutlined />, label: '私密', color: '#faad14' },
-                  { value: 3, icon: <LockOutlined />, label: '密码保护', color: '#1677ff' }
-                ].map(item => (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '8px',
+                height: '92px'
+              }}>
+                {VISIBILITY_OPTIONS.map(item => (
                   <Radio
                     value={item.value}
                     key={item.value}
@@ -416,6 +446,7 @@ const BlogList: React.FC = () => {
                       margin: 0,
                       padding: 0,
                       width: '100%',
+                      height: '100%'
                     }}
                   >
                     <div style={{
@@ -423,13 +454,32 @@ const BlogList: React.FC = () => {
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: '8px 0',
-                      border: '1px solid #f0f0f0',
+                      padding: '8px 4px',
                       borderRadius: '4px',
-                      height: '64px',
+                      height: '100%',
+                      backgroundColor: visibilityForm.getFieldValue('radio') === item.value
+                        ? '#f0f7ff' : '#f9f9f9',
+                      border: visibilityForm.getFieldValue('radio') === item.value
+                        ? '1px solid #91caff' : '1px solid #f0f0f0',
                     }}>
-                      <span style={{ color: item.color, fontSize: '18px', marginBottom: '4px' }}>{item.icon}</span>
-                      <span style={{ fontSize: '12px' }}>{item.label}</span>
+                      <div style={{
+                        color: item.color,
+                        fontSize: '20px',
+                        marginBottom: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {item.icon}
+                      </div>
+                      <div style={{
+                        fontSize: '13px',
+                        color: 'rgba(0, 0, 0, 0.65)',
+                        textAlign: 'center',
+                        lineHeight: '1.2'
+                      }}>
+                        {item.label}
+                      </div>
                     </div>
                   </Radio>
                 ))}
@@ -437,54 +487,64 @@ const BlogList: React.FC = () => {
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.radio !== curr.radio}>
-            {({ getFieldValue }) =>
-              getFieldValue('radio') === 3 && (
-                <Form.Item
-                  name="password"
-                  rules={[
-                    { required: true, message: '请输入访问密码' },
-                    { min: 4, message: '密码长度不能少于4位' },
-                  ]}
-                  style={{ marginBottom: 0 }}
-                >
-                  <Input.Password
-                    prefix={<LockOutlined style={{ color: '#1677ff' }} />}
-                    placeholder="请输入访问密码"
-                    autoComplete="new-password"
-                    style={{ borderRadius: '4px', height: '32px' }}
-                  />
-                </Form.Item>
-              )
-            }
-          </Form.Item>
+          {/* 密码输入部分 */}
+          <div style={{ minHeight: '36px', marginBottom: '16px', display: 'block' }}>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prev, curr) => prev.radio !== curr.radio}
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('radio') === 3 ? (
+                  <Form.Item
+                    name="password"
+                    rules={[
+                      { required: true, message: '请输入访问密码' },
+                      { min: 4, message: '密码长度不能少于4位' },
+                    ]}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined style={{ color: '#1677ff' }} />}
+                      placeholder="请输入访问密码"
+                      autoComplete="new-password"
+                      style={{
+                        borderRadius: '4px',
+                        height: '32px',
+                      }}
+                    />
+                  </Form.Item>
+                ) : null
+              }
+            </Form.Item>
+          </div>
 
-          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.radio !== curr.radio}>
-            {({ getFieldValue }) =>
-              getFieldValue('radio') !== 2 && (
-                <div style={{ marginBottom: 0 }}>
+          {/* 功能选项部分 */}
+          <div style={{ minHeight: '84px', marginBottom: '16px', display: 'block' }}>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prev, curr) => prev.radio !== curr.radio}
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('radio') !== 2 ? (
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',
                     gap: '8px',
                   }}>
-                    {[
-                      { name: 'appreciation', label: '赞赏功能' },
-                      { name: 'recommend', label: '推荐文章' },
-                      { name: 'commentEnabled', label: '评论功能' },
-                      { name: 'top', label: '置顶文章' }
-                    ].map(item => (
+                    {BLOG_FEATURE_OPTIONS.map(item => (
                       <div key={item.name} style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        backgroundColor: '#eeefe9',
-                        padding: '6px 10px',
+                        backgroundColor: '#f9f9f9',
+                        padding: '8px 12px',
                         borderRadius: '4px',
+                        border: '1px solid #f0f0f0',
+                        height: '36px'
                       }}>
                         <span style={{
                           color: 'rgba(0, 0, 0, 0.65)',
-                          fontSize: '12px',
+                          fontSize: '13px',
                         }}>
                           {item.label}
                         </span>
@@ -494,19 +554,35 @@ const BlogList: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )
-            }
-          </Form.Item>
+                ) : (
+                  <div style={{ height: '84px' }}></div>
+                )
+              }
+            </Form.Item>
+          </div>
 
+          {/* 按钮部分 */}
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '8px',
-            marginTop: '4px'
+            marginTop: '8px'
           }}>
-            <Button size="small" onClick={() => setVisible(false)}>取消</Button>
-            <Button size="small" type="primary" htmlType="submit">
+            <Button
+              onClick={() => setVisible(false)}
+              style={{
+                borderRadius: '4px',
+              }}
+            >
+              取消
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{
+                borderRadius: '4px',
+              }}
+            >
               保存
             </Button>
           </div>
