@@ -1,0 +1,103 @@
+html,
+body {
+  background: rgb(238, 239, 233) !important;
+}
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  background: rgb(238, 239, 233) !important;
+}
+
+.colorWeak {
+  filter: invert(80%);
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+.ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
+  left: unset;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+@media (max-width: 768px) {
+  .ant-table {
+    width: 100%;
+    overflow-x: auto;
+    &-thead > tr,
+    &-tbody > tr {
+      > th,
+      > td {
+        white-space: pre;
+        > span {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+// 设置整体背景色 - 增强选择器优先级
+html,
+body,
+#root,
+.ant-layout,
+.ant-layout-content,
+.ant-pro-layout {
+  background: rgb(238, 239, 233) !important;
+}
+
+// 修改页面容器背景色
+.ant-pro-page-container,
+.ant-pro-page-container-children-content,
+.ant-pro-page-container-warp,
+.ant-pro-grid-content,
+.ant-pro-grid-content-children {
+  background: rgb(238, 239, 233) !important;
+}
+
+// 修改侧边栏和导航栏背景色
+.ant-layout-sider,
+.ant-pro-sider,
+.ant-layout-header,
+.ant-pro-top-nav-header,
+.ant-menu {
+  background: rgb(238, 239, 233) !important;
+}
+
+// 确保卡片和表格内容区域背景色正确
+.ant-card,
+.ant-card-body,
+.ant-table,
+.ant-table-container,
+.ant-table-content,
+.ant-pro-card,
+.ant-pro-card-body {
+  background: rgb(238, 239, 233) !important;
+}
+
+// 修复可能的滚动区域背景色
+.ant-pro-layout-content,
+.ant-pro-layout-container,
+.ant-pro-layout-children-content-wrap {
+  background: rgb(238, 239, 233) !important;
+}
+
