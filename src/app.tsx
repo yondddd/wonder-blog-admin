@@ -24,7 +24,7 @@ export async function getInitialState(): Promise<{
   const fetchUserInfo = async () => {
     try {
       const userStr = localStorage.getItem('user');
-      if (!userStr) {
+      if (!userStr && location.pathname !== '/blog/share') {
         // 未登录
         history.push(loginPath);
         return null;
@@ -69,7 +69,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
+      if (!initialState?.currentUser && location.pathname !== loginPath && location.pathname !== '/blog/share') {
         history.push(loginPath);
       }
     },
